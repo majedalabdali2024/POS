@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="Style.css">
+    <title>Dynamic Sidenav</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'jannalt', sans-serif;
+        }
+
+        body {
+            font-family: 'jannalt', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            transition: margin-right 0.3s ease;
+        }
+
+        header {
+            width: 100%;
+            height: 70px;
+            background-color: rgb(239, 239, 239);
+            box-shadow: 0px 0px 12px black;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: fixed;
+            top: 0;
+            z-index: 3;
+            transition: width 0.3s ease;
+        }
+
+        header img {
+            width: 75px;
+            height: 60px;
+        }
+
+        header .Btnhd button {
+            width: 140px;
+            border: none;
+            background: none;
+            font-size: 18px;
+            padding: 10px;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s ease, box-shadow 0.3s ease;
+            margin-right: 20px;
+        }
+
+        header .Btnhd button:hover {
+            color: #0094F8;
+            box-shadow: 0px 0px 7px rgba(158, 158, 158, 0.8);
+        }
+
+        /* Sidenav Styling */
+        .sidenav {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            right: 0;
+            background-color: #424242;
+            overflow-x: hidden;
+            padding-top: 70px;
+            transition: 0.3s;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidenav a, .dropdown-btn {
+            padding: 10px 20px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 18px;
+            color: #ffffff;
+            display: block;
+            background: rgba(255, 255, 255, 0.027);
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+
+        .sidenav a:hover, .dropdown-btn:hover {
+            color: #0094F8;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0px 0px 7px rgba(158, 158, 158, 0.8);
+            border-radius: 4px;
+        }
+
+        .dropdown-container {
+            display: none;
+            background-color: #575757;
+            padding-left: 8px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            max-height: 0;
+        }
+
+        .dropdown-container a {
+            font-size: 16px;
+            padding: 8px 20px;
+            color: #ccc;
+            display: block;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .dropdown-container a:hover {
+            background-color: #6c6c6c;
+            color: #fff;
+        }
+
+        .dropdown-btn.active + .dropdown-container {
+            max-height: 200px; /* Adjust based on content */
+            padding: 10px 0;
+        }
+
+        /* Toggle Button Styling */
+        .toggle-btn {
+            position: fixed;
+            top: 35px;
+            right: -50px; /* Start hidden */
+            width: 40px;
+            height: 40px;
+            background: #4a4a4a;
+            color: white;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease, background-color 0.3s ease;
+            z-index: 4;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .hover-area {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 20px;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .hover-area:hover ~ .toggle-btn,
+        .toggle-btn:hover {
+            right: 0; /* Make button visible */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toggle-btn:hover {
+            background-color: #575757;
+            transform: scale(1.1);
+        }
+
+        .main {
+            margin: 100px 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: margin-right 0.3s ease;
+        }
+
+        main h2 {
+            line-height: 1.8;
+            font-weight: 700;
+            color: #0094F8;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .sidenav {
+                width: 100%;
+            }
+
+            .main {
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header id="header">
+        <div>
+            <img src="Pic/NajahIcon.png" alt="Logo">
+        </div>
+        <div class="Btnhd">
+            <button>الرئيسية</button>
+            <button>النماذج</button>
+            <button>التقارير</button>
+            <button>الأصناف</button>            
+        </div> 
+    </header>
+
+    <!-- Sidenav -->
+    <div id="mySidenav" class="sidenav">
+        <button class="dropdown-btn">البيانات الأساسية</button>
+        <div class="dropdown-container">
+            <a href="#">المجموعات</a>
+            <a href="#">الأصناف</a>
+            <a href="#">العملاء</a>
+        </div>
+        <a href="#">النماذج</a>
+        <a href="#">التقارير</a>
+        <a href="#">الأصناف</a>
+    </div>
+
+    <!-- Hover Area -->
+    <div class="hover-area"></div>
+
+    <!-- Toggle Button -->
+    <button class="toggle-btn" id="toggleBtn" onclick="toggleNav()">
+        <span style="font-size: 16px;">☰</span>
+    </button>
+
+    <!-- Main Content -->
+    <div class="main">
+        <main>
+            <h2>
+                تكنولوجيا<br>
+                دعم<br>
+                هندسة<br>
+                إبــداع<br>
+                أمن معلوماتي
+            </h2>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function toggleNav() {
+            const sidenav = document.getElementById("mySidenav");
+            const header = document.getElementById("header");
+            const toggleBtn = document.getElementById("toggleBtn");
+
+            if (sidenav.style.width === "250px") {
+                sidenav.style.width = "0";
+                header.style.width = "100%";
+                document.body.style.marginRight = "0";
+                toggleBtn.innerHTML = "☰"; // Reset to menu icon
+            } else {
+                sidenav.style.width = "250px";
+                header.style.width = "calc(100% - 250px)";
+                document.body.style.marginRight = "250px";
+                toggleBtn.innerHTML = "<span style='font-size: 16px;'>×</span>"; // Change to close icon
+            }
+        }
+
+        // Dropdown functionality
+        const dropdownBtns = document.querySelectorAll(".dropdown-btn");
+        dropdownBtns.forEach(btn => {
+            btn.addEventListener("click", function() {
+                this.classList.toggle("active");
+                const dropdownContainer = this.nextElementSibling;
+                if (dropdownContainer.style.maxHeight) {
+                    dropdownContainer.style.maxHeight = null;
+                } else {
+                    dropdownContainer.style.maxHeight = dropdownContainer.scrollHeight + "px";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

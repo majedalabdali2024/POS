@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NAJAH SOFT - تسجيل الدخول</title>
+  <link rel="icon" href="imgs/NajahIcon.png">
+  <link rel="stylesheet" href="Style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #F8F9FA;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: JannaLt, sans-serif;
+    }
+    .form-signin {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    .form-signin h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    footer {
+      font-family: JannaLt, sans-serif;
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <main class="form-signin">
+    <form id="loginForm">
+      <h1 id="formTitle">نقاط البيع</h1><br>
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="username" placeholder="اسم المستخدم">
+        <label for="username" id="usernameLabel">اسم المستخدم</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="password" class="form-control" id="password" placeholder="كلمة المرور">
+        <label for="password" id="passwordLabel">كلمة المرور</label>
+      </div>
+      <div class="form-floating mb-3">
+        <select class="form-select" id="branch">
+          <option value="branch1">الفرع 1</option>
+          <option value="branch2">الفرع 2</option>
+          <option value="branch3">الفرع 3</option>
+        </select>
+        <label for="branch" id="branchLabel">الفرع</label>
+      </div>
+      <div class="form-floating mb-3">
+        <select class="form-select" id="language" onchange="changeLanguage()">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+        <label for="language" id="languageLabel">اللغة</label>
+      </div>
+      <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="year" placeholder="السنة" min="2000" max="2100">
+        <label for="year" id="yearLabel">السنة</label>
+      </div>
+      <br>
+      <button class="btn btn-primary w-100" type="button" onclick="chk_user()">تسجيل دخول</button>
+    </form>
+    <footer>
+      Copyright © 2024 Najah, All rights reserved
+    </footer>
+  </main>
+
+  <script>
+    const translations = {
+      ar: {
+        formTitle: "نقاط البيع",
+        usernameLabel: "اسم المستخدم",
+        passwordLabel: "كلمة المرور",
+        branchLabel: "الفرع",
+        languageLabel: "اللغة",
+        yearLabel: "السنة",
+        loginButton: "تسجيل دخول",
+      },
+      en: {
+        formTitle: "Point of Sale",
+        usernameLabel: "Username",
+        passwordLabel: "Password",
+        branchLabel: "Branch",
+        languageLabel: "Language",
+        yearLabel: "Year",
+        loginButton: "Login",
+      },
+    };
+
+    function changeLanguage() {
+      const selectedLanguage = document.getElementById("language").value;
+      const dir = selectedLanguage === "ar" ? "rtl" : "ltr";
+      const lang = selectedLanguage;
+
+      // Change direction and language attributes
+      document.documentElement.dir = dir;
+      document.documentElement.lang = lang;
+
+      // Update text based on selected language
+      const labels = translations[selectedLanguage];
+      document.getElementById("formTitle").textContent = labels.formTitle;
+      document.getElementById("usernameLabel").textContent = labels.usernameLabel;
+      document.getElementById("passwordLabel").textContent = labels.passwordLabel;
+      document.getElementById("branchLabel").textContent = labels.branchLabel;
+      document.getElementById("languageLabel").textContent = labels.languageLabel;
+      document.getElementById("yearLabel").textContent = labels.yearLabel;
+      document.querySelector("button").textContent = labels.loginButton;
+    }
+
+    function chk_user() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      if (username === "Majed" && password === "123") {
+        const selectedLanguage = document.getElementById("language").value;
+        localStorage.setItem("language", selectedLanguage);
+        alert(selectedLanguage === "ar" ? "مرحباً Majed" : "Welcome Majed");
+        window.location.href = 'main.html';
+      } else {
+        alert(selectedLanguage === "ar" ? "بيانات تسجيل الدخول غير صحيحة" : "Invalid login credentials");
+      }
+    }
+
+    // Set language on load
+    window.onload = () => {
+      const savedLanguage = localStorage.getItem("language") || "ar";
+      document.getElementById("language").value = savedLanguage;
+      changeLanguage();
+    };
+  </script>
+</body>
+</html>

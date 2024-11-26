@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="Style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Item Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <style>
+      .table-container {
+        background-color: #ffffff;
+        box-shadow: 0px 0px 7px silver;
+        padding: 20px;
+        margin: 40px;
+        border-radius: 7px;
+      }
+
+      .table thead th, .table tbody td {
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .custom-header {
+        background-color: #1e558f !important;
+        color: white !important;
+      }
+
+      .form-control {
+        box-shadow: none;
+        border-radius: 5px;
+      }
+
+      .modal-dialog.modal-wide {
+        max-width: 90%;
+        margin-top: 5%;
+      }
+      .btn {
+        border-radius: 5px;
+      }
+
+      .btn-light {
+        border: 1px solid #ddd;
+      }
+
+      .form-check-input {
+        margin: 0 auto;
+        float: right;
+      }
+
+      #statusText {
+        font-weight: bold;
+        color: #007bff;
+        transition: transform 0.3s ease; /* Smooth movement */
+        display: inline-block; /* Ensures transform works */
+        transform: translateX(-20px);
+      }
+
+      .image-upload-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .image-upload-item {
+        width: 120px;
+        height: 120px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        background-color: #f9f9f9;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .image-upload-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .image-upload-item .remove-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 14px;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .add-image {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: #aaa;
+        font-size: 14px;
+        text-align: center;
+        background-color: #f9f9f9;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .add-image:hover {
+        border-color: #69819b;
+        color: #69819b;
+      }
+
+      .sortable {
+        cursor: pointer;
+        position: relative;
+        padding-right: 20px;
+      }
+
+      .sortable i {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: color 0.3s ease, transform 0.2s;
+        color: #ccc;
+      }
+
+      .sortable:hover i {
+        color: #1e558f;
+      }
+
+      .sortable.sorted-asc i {
+        color: #1e558f;
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      .sortable.sorted-desc i {
+        color: #1e558f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="text-center mt-4">Item Management</h1>
+    <div class="container">
+      <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#itemModal" onclick="prepareForAdd()">Add New Item <i class="fas fa-add"></i></button>
+          <input type="text" class="form-control w-25 ms-3" placeholder="Search" id="searchInput" onkeyup="filterTable()">
+        </div>
+        <table class="table table-hover table-bordered">
+          <thead class="custom-header">
+            <tr>
+              <th scope="col" onclick="sortTable('item_name')" class="sortable">
+                Item Name <i class="fas fa-sort"></i>
+              </th>
+              <th scope="col" onclick="sortTable('item_name_e')" class="sortable">
+                Item Name (English) <i class="fas fa-sort"></i>
+              </th>
+              <th scope="col" onclick="sortTable('Status')" class="sortable">
+                Status <i class="fas fa-sort"></i>
+              </th>
+              <th scope="col" onclick="sortTable('cat')" class="sortable">
+                Category <i class="fas fa-sort"></i>
+              </th>
+              <th scope="col" onclick="sortTable('unit')" class="sortable">
+                Unit <i class="fas fa-sort"></i>
+              </th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="itemTableBody">
+            <tr>
+              <td colspan="8" class="text-center">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+<!-- Modal -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-wide">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="itemModalLabel">Add/Edit Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="itemForm">
+          <div class="row">
+            <!-- Row 1: Item Name, Item Name E, Status -->
+            <input style="display: none;" class="form-control" id="id" type="text" name="id" placeholder="ID" readonly>
+            <div class="col-md-4 mb-3">
+              <label for="item-name" class="form-label">Item Name</label>
+              <input class="form-control" id="item-name" type="text" name="item-name" placeholder="Item Name" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="item-name-e" class="form-label">Item Name E</label>
+              <input class="form-control" id="item-name-e" type="text" name="item-name-e" placeholder="Item Name E" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="d-flex align-items-center">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="itemStatusSwitch" checked onchange="updateStatusLabel()" disabled>
+                </div>
+                <span id="statusText" class="ms-3">فعال</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Row 2: Category, Unit, Item Code -->
+            <div class="col-md-4 mb-3">
+              <label for="item-cat" class="form-label">Category</label>
+              <input class="form-control" id="item-cat" type="text" name="item-cat" placeholder="Category" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="item-unit" class="form-label">Unit</label>
+              <input class="form-control" id="item-unit" type="text" name="item-unit" placeholder="Unit" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="item-code" class="form-label">Item Code</label>
+              <input class="form-control" id="item-code" type="text" name="item-code" placeholder="Item Code" disabled>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Row 3: SKU, Tax Type, Discount Type -->
+            <div class="col-md-4 mb-3">
+              <label for="item-sku" class="form-label">SKU</label>
+              <input class="form-control" id="item-sku" type="text" name="item-sku" placeholder="SKU" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="item-tax-type" class="form-label">Tax Type</label>
+              <input class="form-control" id="item-tax-type" type="text" name="item-tax-type" placeholder="Tax Type" disabled>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="item-discount-type" class="form-label">Discount Type</label>
+              <input class="form-control" id="item-discount-type" type="text" name="item-discount-type" placeholder="Discount Type" disabled>
+            </div>
+          </div>
+
+          <div class="row">
+            <!-- Row 4: Expiry Date, Price -->
+            <div class="col-md-6 mb-3">
+              <label for="expiry-on" class="form-label">Expiry Date</label>
+              <input class="form-control" id="expiry-on" type="date" name="expiry-on" disabled>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="item-price" class="form-label">Price</label>
+              <input class="form-control" id="item-price" type="number" name="item-price" placeholder="Price" step="0.01" disabled>
+            </div>
+          </div>
+
+          <!-- Images Section -->
+          <div class="mb-3">
+            <label class="form-label">Item images </label>
+            <div class="image-upload-container" id="imageUploadContainer">
+              <div class="add-image" onclick="addImageInput()">Add Image +</div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+        <button type="button" class="btn btn-primary" onclick="saveData()" disabled id="saveButton">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      let isEditMode = false;
+    
+      function prepareForAdd() {
+        document.getElementById('itemForm').reset();
+        disableFormFields(false);
+        document.getElementById('itemStatusSwitch').checked = true; // Default to active for new items
+        updateStatusLabel(); // Update status label and text
+        isEditMode = false;
+        document.getElementById('saveButton').disabled = false;
+      }
+    
+      async function fetchItems() {
+        try {
+          const response = await fetch('http://84.46.240.24:8000/api/items_list/');
+          if (response.ok) {
+            const items = await response.json();
+            const tableBody = document.getElementById('itemTableBody');
+            tableBody.innerHTML = '';
+            items.forEach(item => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${item.item_name}</td>
+                <td>${item.item_name_e}</td>
+                <td>${item.item_status ? 'Active' : 'Inactive'}</td>
+                <td>${item.cat || 'N/A'}</td>
+                <td>${item.unit || 'N/A'}</td>
+                <td>
+                  <button class="btn btn-sm" style="color:gray" onclick='editItem(${JSON.stringify(item)})'> 
+                    <i class="fas fa-edit"></i> 
+                  </button>
+                  <button class="btn btn-sm" style="color:#41A5EE" onclick='previewItem(${JSON.stringify(item)})'> 
+                    <i class="fas fa-eye"></i> 
+                  </button>
+                  <button class="btn btn-sm" style="color:red" onclick="deleteItem('${item.id}')"> 
+                    <i class="fas fa-trash"></i> 
+                  </button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+          } else {
+            alert('Failed to fetch items.');
+          }
+        } catch (error) {
+          console.error('Error fetching items:', error);
+        }
+      }
+    
+      async function saveData() {
+        const id = document.getElementById('id').value;
+        const itemName = document.getElementById('item-name').value;
+        const itemNameE = document.getElementById('item-name-e').value;
+        const itemStatus = document.getElementById('itemStatusSwitch').checked; // Get status from the switch
+        const itemCat = document.getElementById('item-cat').value;
+        const itemUnit = document.getElementById('item-unit').value;
+    
+        const data = { item_name: itemName, item_name_e: itemNameE, item_status: itemStatus, cat_id: itemCat, unit_id: itemUnit };
+    
+        try {
+          const url = isEditMode
+            ? `http://84.46.240.24:8000/api/api_update_item/${id}`
+            : 'http://84.46.240.24:8000/api/api_create_item';
+          const method = isEditMode ? 'PUT' : 'POST';
+    
+          const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+    
+          if (response.ok) {
+            alert(isEditMode ? 'Item updated successfully!' : 'Item saved successfully!');
+            fetchItems();
+            document.getElementById('itemForm').reset();
+            bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
+          } else {
+            alert('Failed to save item.');
+          }
+        } catch (error) {
+          console.error('Error saving item:', error);
+        }
+      }
+    
+      function previewItem(item) {
+        // Populate the modal fields with the item data
+        document.getElementById('id').value = item.id || '';
+        document.getElementById('item-name').value = item.item_name || '';
+        document.getElementById('item-name-e').value = item.item_name_e || '';
+        document.getElementById('itemStatusSwitch').checked = item.item_status || false;
+        updateStatusLabel(); // Update the status text based on item status
+        document.getElementById('item-cat').value = item.cat || '';
+        document.getElementById('item-unit').value = item.unit || '';
+        document.getElementById('item-code').value = item.item_code || '';
+        document.getElementById('item-sku').value = item.sku || '';
+        document.getElementById('item-tax-type').value = item.tax_type || '';
+        document.getElementById('item-discount-type').value = item.discount_type || '';
+        document.getElementById('expiry-on').value = item.expiry_date || '';
+        document.getElementById('item-price').value = item.price || '';
+    
+        // Disable fields for preview
+        disableFormFields(true);
+    
+        // Open the modal
+        const modal = new bootstrap.Modal(document.getElementById('itemModal'));
+        modal.show();
+      }
+    
+      function editItem(item) {
+        previewItem(item); // First, load item details into the form
+        enableEdit(); // Enable editing mode
+        isEditMode = true;
+        document.getElementById('saveButton').disabled = false; // Enable save button
+      }
+    
+      function updateStatusLabel() {
+        const statusSwitch = document.getElementById('itemStatusSwitch');
+        const statusText = document.getElementById('statusText');
+    
+        // Update the status text based on the switch state
+        if (statusSwitch.checked) {
+          statusText.textContent = 'Active'; // Active
+          statusText.style.color = '#007bff'; // Blue color for active
+        } else {
+          statusText.textContent = 'Inactive'; // Inactive
+          statusText.style.color = '#dc3545'; // Red color for inactive
+        }
+      }
+    
+      function disableFormFields(disable) {
+        const formFields = document.querySelectorAll('#itemForm input');
+        formFields.forEach(field => (field.disabled = disable));
+        document.getElementById('saveButton').disabled = disable;
+      }
+    
+      async function deleteItem(id) {
+        if (!confirm('Are you sure you want to delete this item?')) return;
+    
+        try {
+          const response = await fetch(`http://84.46.240.24:8000/api/api_delete_item/${id}`, { method: 'DELETE' });
+    
+          if (response.ok) {
+            alert('Item deleted successfully!');
+            fetchItems();
+          } else {
+            alert('Failed to delete item.');
+          }
+        } catch (error) {
+          console.error('Error deleting item:', error);
+        }
+      }
+    
+      // Fetch and display items on page load
+      fetchItems();
+    
+      function addImageInput() {
+        const container = document.getElementById('imageUploadContainer');
+        const newImage = document.createElement('div');
+        newImage.classList.add('image-upload-item');
+    
+        newImage.innerHTML = `
+          <input type="file" class="form-control" style="display: none;" onchange="previewImage(event, this)"/>
+          <div class="remove-btn" onclick="removeImage(this)" title="إزالة">&times;</div>
+        `;
+    
+        const fileInput = newImage.querySelector('input');
+        fileInput.click();
+    
+        container.insertBefore(newImage, container.querySelector('.add-image'));
+      }
+    
+      function previewImage(event, input) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          input.parentElement.appendChild(img);
+        };
+        reader.readAsDataURL(input.files[0]);
+        input.style.display = 'none';
+      }
+    
+      function removeImage(button) {
+        button.parentElement.remove();
+      }
+
+      function filterTable() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#itemTableBody tr');
+        rows.forEach(row => {
+          const matches = Array.from(row.querySelectorAll('td')).some(td => td.textContent.toLowerCase().includes(searchInput));
+          row.style.display = matches ? '' : 'none';
+        });
+      }
+
+      function enableEdit() {
+        disableFormFields(false);
+        document.getElementById('id').readOnly = true;
+      }
+
+      function sortTable(column) {
+        const tableBody = document.getElementById('itemTableBody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Toggle the sort direction
+        let sortDirection = 'asc';
+        if (tableBody.getAttribute('data-sort-column') === column) {
+          sortDirection = tableBody.getAttribute('data-sort-direction') === 'asc' ? 'desc' : 'asc';
+        }
+
+        // Sort rows
+        rows.sort((a, b) => {
+          const cellA = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim().toLowerCase();
+          const cellB = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim().toLowerCase();
+
+          if (sortDirection === 'asc') {
+            return cellA.localeCompare(cellB);
+          } else {
+            return cellB.localeCompare(cellA);
+          }
+        });
+
+        // Update sort attributes
+        tableBody.setAttribute('data-sort-column', column);
+        tableBody.setAttribute('data-sort-direction', sortDirection);
+
+        // Re-render rows
+        tableBody.innerHTML = '';
+        rows.forEach(row => tableBody.appendChild(row));
+      }
+    </script>
+  </body>
+</html>

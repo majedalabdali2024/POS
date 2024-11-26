@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="Style.css">
+
+    <style>
+        .room-card {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            margin: 10px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            text-align: center;
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+        .room-icon {
+            font-size: 26px;
+            margin-bottom: 5px;
+        }
+        .available {
+            background-color: #a8e6cf; 
+        }
+        .available:hover {
+            background-color: #98ddc4; 
+        }
+        .occupied {
+            background-color: #ff8b94; 
+        }
+        .occupied:hover {
+            background-color: #ff6b6b;
+        }
+        .maintenance {
+            background-color: #ffd3b6; 
+        }
+        .maintenance:hover {
+            background-color: #ffb88c; 
+        }
+        #rooms {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        #data-section {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #data-section h3 {
+            margin-bottom: 20px;
+        }
+        #data-section select, #data-section button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">نظام نزيل</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#" id="dashboardLink">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0" role="search">
+                <input id="searchBox" class="form-control mr-sm-2" type="search" placeholder="Search Room ID" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-9">
+            <div id="rooms">
+                <div class="room-card available" data-room-id="101">
+                    <i class="fas fa-bed room-icon"></i>
+                    101
+                </div>
+                <div class="room-card occupied" data-room-id="102">
+                    <i class="fas fa-bed room-icon"></i>
+                    102
+                </div>
+                <div class="room-card maintenance" data-room-id="103">
+                    <i class="fas fa-wrench room-icon"></i>
+                    103
+                </div>
+                <div class="room-card available" data-room-id="104">
+                    <i class="fas fa-bed room-icon"></i>
+                    104
+                </div>
+                <div class="room-card occupied" data-room-id="105">
+                    <i class="fas fa-bed room-icon"></i>
+                    105
+                </div>
+                <div class="room-card available" data-room-id="106">
+                    <i class="fas fa-bed room-icon"></i>
+                    106
+                </div>
+            </div>
+        </div>
+        
+       
+        <div class="col-md-3">
+            <div id="data-section">
+                <h3>رسم بياناتي بحاله التأخير</h3>
+                <label for="time-period">اختر الفترة الزمنية:</label>
+                <select id="time-period" class="form-control">
+                    <option value="week">الأسبوع</option>
+                    <option value="month">الشهر</option>
+                    <option value="year">السنة</option>
+                </select>
+                <button class="btn btn-primary mt-3">عرض البيانات</button>
+                <div id="chart" class="mt-4">
+                    
+                    <p>ستظهر هنا البيانات بناءً على الفترة الزمنية المختارة.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+<script>
+   
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        
+        document.getElementById('dashboardLink').addEventListener('click', function(event) {
+            event.preventDefault(); 
+            const roomsElement = document.getElementById('rooms');
+            if (roomsElement.style.display === "none" || roomsElement.style.display === "") {
+                roomsElement.style.display = "block";
+            } else {
+                roomsElement.style.display = "none";
+            }
+        });
+
+        
+        document.getElementById('searchBox').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(function(card) {
+                const roomId = card.getAttribute('data-room-id');
+                if (roomId && roomId.toLowerCase().includes(searchValue)) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMDAD POS SYSTEM</title>
+  <link rel="stylesheet" href="Style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      color: #333;
+      font-family: 'jannalt', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .top-nav {
+      width: calc(100% - 250px);
+      height: 50px;
+      background-color: #343a40;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: width 0.5s, margin-right 0.5s;
+    }
+
+    .top-nav.closed {
+      width: 100%;
+      margin-right: 0;
+    }
+
+    .top-nav .toggle-btn {
+      font-size: 18px;
+      color: #fff;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .sidenav {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      z-index: 3;
+      top: 0;
+      right: 0;
+      background-color: #343a40;
+      overflow-x: hidden;
+      transition: width 0.5s;
+      box-shadow: -4px 0 8px rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+    }
+
+    .sidenav.closed {
+      width: 0;
+    }
+
+    .sidenav-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background-color: #343a40;
+      color: #fff;
+    }
+
+    .sidenav-header .toggle-btn{
+      background-color: transparent;
+      border: none;
+      font-size: 20px;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 200px;
+      cursor: pointer;
+    }
+    .sidenav-header .toggle-btn:hover{
+      background-color: transparent;
+      border: none;
+      font-size: 20px;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      right: 200px;
+      cursor: pointer;
+      box-shadow: 0,0,7px silver;
+      transition: 1s;
+    }
+
+    .sidenav.closed .sidenav-header .toggle-btn {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 4;
+    background-color: #343a40;
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    }
+
+
+
+    .sidenav a, .dropdown-btn {
+      background-color: #343a40;
+      border: none;
+      padding: 12px 16px;
+      text-decoration: none;
+      font-size: 16px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background-color 0.3s, color 0.3s;
+      width: 100%;
+      font-family: "jannalt";
+    }
+
+    .sidenav a:hover, .dropdown-btn:hover {
+      background-color: #495057;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .dropdown-container {
+      background-color: #343a40;
+      padding-left: 20px;
+      overflow: hidden;
+      height: 0;
+      transition: height 0.4s ease;
+    }
+
+    .dropdown-container.active {
+      height: auto;
+    }
+
+    .iframe-container {
+      margin-top: 50px;
+      margin-right: 250px;
+      height: calc(100vh - 50px);
+      transition: margin-right 0.5s;
+    }
+
+    .iframe-container.expanded {
+      margin-right: 0;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background-color: transparent;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      color: #6c757d;
+      margin-top: 2rem;
+      border-top: 1px solid #dee2e6;
+    }
+
+    div .nav-link {
+      padding: 10px;
+      color: #fff;
+      text-decoration: none;
+      border: 0px solid silver;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidenav img{
+      margin: 3px;
+      width: 70%;
+      height: 40px;
+    }
+
+  </style>
+</head>
+<body class="light">
+  <div id="overlay" class="overlay" onclick="toggleNav()"></div>
+  <div id="top-nav" class="top-nav">
+    <!-- <button class="toggle-btn" onclick="toggleNav()">&#9776;</button>
+    <span id="site-title">نظام إمداد لنقاط البيع</span> -->
+  </div>
+
+  <div class="sidenav" id="mySidenav">
+    <div>
+      <!-- <p>Comany Name</p> -->
+    </div>
+    <div class="sidenav-header">
+      <button class="toggle-btn" onclick="toggleNav()">&#9776;</button>
+      <img src="imgs/project-najeh-soft-ar-logo-samall-blue-text-480x117.png" alt="Company Logo">
+    </div>
+    <a href="#" onclick="loadPage('dashboard.html')"><i class="fas fa-chart-bar icon"></i> لوحة المعلومات</a>
+    <button class="dropdown-btn"><i class="fas fa-chalkboard"></i> البيانات الأساسية
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+      <a href="#" onclick="loadPage('accounts.html')"><i class="fas fa-dollar icon"></i> دليل الحسابات</a>
+      <a href="#" onclick="loadPage('currencies.html')"><i class="fas fa-dollar icon"></i> العملات</a>
+      <a href="#" onclick="loadPage('items.html')"><i class="fas fa-box icon"></i> الأصناف</a>
+      <a href="#" onclick="loadPage('units.html')"><i class="fas fa-box icon"></i> الوحدات</a>
+      <a href="#" onclick="loadPage('categories.html')"><i class="fas fa-layer-group icon"></i> المجموعات</a>
+      <a href="#" onclick="loadPage('customers.html')"><i class="fas fa-users icon"></i> العملاء</a>
+    </div>
+    <button class="dropdown-btn"><i class="fas fa-folder-open"></i> النماذج
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+      <a href="#" onclick="loadPage('pos.html')"><i class="fas fa-store icon"></i> نقاط البيع</a>
+    </div>
+    <a href="#" onclick="loadPage('settings.html')"><i class="fas fa-sliders-h icon"></i> الإعدادات</a>
+  </div>
+
+  <div class="iframe-container" id="iframeContainer">
+    <iframe id="contentFrame"></iframe>
+  </div>
+
+  <script>
+    function loadPage(page) {
+      const iframe = document.getElementById('contentFrame');
+      iframe.src = page;
+    }
+
+    function toggleNav() {
+      const sidenav = document.getElementById('mySidenav');
+      const iframeContainer = document.getElementById('iframeContainer');
+      const topnav = document.getElementById('top-nav');
+
+      sidenav.classList.toggle('closed');
+      iframeContainer.classList.toggle('expanded');
+      topnav.classList.toggle('closed');
+    }
+
+    var dropdown = document.getElementsByClassName("dropdown-btn");
+    for (let i = 0; i < dropdown.length; i++) {
+      dropdown[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        let dropdownContent = this.nextElementSibling;
+        if (dropdownContent.style.height && dropdownContent.style.height !== "0px") {
+          dropdownContent.style.height = "0px";
+        } else {
+          dropdownContent.style.height = dropdownContent.scrollHeight + "px";
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const sidenav = document.getElementById('mySidenav');
+      sidenav.classList.remove('closed');
+    });
+  </script>
+</body>
+</html>

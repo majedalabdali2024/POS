@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Customer Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+      .table-container {
+        background-color: #ffffff;
+        box-shadow: 0px 0px 7px silver;
+        padding: 20px;
+        margin: 40px;
+        border-radius: 7px;
+      }
+
+      .table-filters {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .table thead th {
+        vertical-align: middle;
+        text-align: center;
+      }
+
+      .table tbody td {
+        vertical-align: middle;
+        text-align: center;
+      }
+
+      .form-control {
+        box-shadow: none;
+        border-radius: 5px;
+      }
+      
+      .modal-body {
+        padding: 20px 40px;
+      }
+
+      .modal-body .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+      }
+
+      .form-group {
+        flex: 1 1 calc(48%);
+      }
+
+      .form-group textarea {
+        flex: 1 1 100%;
+      }
+
+      .modal-dialog {
+        max-width: 900px; /* Adjust width as needed */
+      }
+
+      .btn {
+        border-radius: 5px;
+      }
+
+      .btn-light {
+        border: 1px solid #ddd;
+      }
+
+      .custom-header {
+        background-color: #1e558f !important;
+        color: white !important;
+      }
+
+      .sortable {
+        cursor: pointer;
+        position: relative;
+        padding-right: 20px;
+      }
+
+      .sortable i {
+        position: absolute;
+        right: 5px;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: color 0.3s ease, transform 0.2s;
+        color: #ccc;
+      }
+
+      .sortable:hover i {
+        color: #1e558f;
+      }
+
+      .sortable.sorted-asc i {
+        color: #1e558f;
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      .sortable.sorted-desc i {
+        color: #1e558f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="text-center mt-4">Customers Management</h1>
+    <div class="container">
+      <div class="table-container">
+        <div class="table-filters">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Add New Customer</button>
+          <input type="text" class="form-control w-25 ms-3" placeholder="Search" id="searchInput" onkeyup="filterCustomerTable()">
+        </div>
+        <table class="table table-hover table-bordered">
+          <thead class="custom-header">
+            <tr>
+              <th scope="col" onclick="sortCustomerTable('cust_name')" class="sortable">Name <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_vat_no')" class="sortable">VAT No <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_email')" class="sortable">Email <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_mobile')" class="sortable">Mobile <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_cr_no')" class="sortable">CR No <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_address')" class="sortable">Address <i class="fas fa-sort"></i></th>
+              <th scope="col" onclick="sortCustomerTable('cust_type')" class="sortable">Type <i class="fas fa-sort"></i></th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody">
+            <tr>
+              <td colspan="8" class="text-center">Loading data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add Customer Modal -->
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="customerForm">
+              <div class="form-row">
+                <!-- <div class="form-group">
+                  <label for="cust-id">Customer ID</label>
+                  <input class="form-control" id="cust-id" type="text" name="cust-id" placeholder="Customer ID">
+                </div> -->
+
+                <div class="form-group">
+                  <label for="cust-name">Customer Name</label>
+                  <input class="form-control" id="cust-name" type="text" name="cust-name" placeholder="Customer Name">
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-vat-no">VAT Number</label>
+                  <input class="form-control" id="cust-vat-no" type="text" name="cust-vat-no" placeholder="VAT Number">
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-email">Email</label>
+                  <input class="form-control" id="cust-email" type="email" name="cust-email" placeholder="Email">
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-mobile">Mobile</label>
+                  <input class="form-control" id="cust-mobile" type="text" name="cust-mobile" placeholder="Mobile">
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-cr-no">Commercial Registration Number</label>
+                  <input class="form-control" id="cust-cr-no" type="text" name="cust-cr-no" placeholder="CR Number">
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-address">Address</label>
+                  <textarea class="form-control" id="cust-address" name="cust-address" placeholder="Address"></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="cust-type">Customer Type</label>
+                  <input class="form-control" id="cust-type" type="text" name="cust-type" placeholder="Customer Type">
+                </div>
+              </div>
+              <br>
+              <button type="button" class="btn btn-primary" onclick="postCustomerData()">Save</button>
+              <button type="reset" class="btn btn-warning">Clear</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      async function postCustomerData() {
+        const data = {
+          cust_name: document.getElementById('cust-name').value,
+          cust_vat_no: document.getElementById('cust-vat-no').value,
+          cust_email: document.getElementById('cust-email').value,
+          cust_mobile: document.getElementById('cust-mobile').value,
+          cust_cr_no: document.getElementById('cust-cr-no').value,
+          cust_address: document.getElementById('cust-address').value,
+          cust_type: document.getElementById('cust-type').value
+        };
+
+        try {
+          const response = await fetch('http://84.46.240.24:8000/api/api_create_customer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          if (response.ok) {
+            alert('Customer saved successfully!');
+            fetchCustomers();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
+            modal.hide();
+          } else {
+            alert('Failed to save customer.');
+          }
+        } catch (error) {
+          console.error('Request failed:', error);
+        }
+      }
+
+      async function fetchCustomers() {
+        try {
+          const response = await fetch('http://84.46.240.24:8000/api/customers_list');
+          if (response.ok) {
+            const customers = await response.json();
+            const tableBody = document.getElementById('customerTableBody');
+            tableBody.innerHTML = '';
+            customers.forEach(customer => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${customer.cust_name}</td>
+                <td>${customer.cust_vat_no}</td>
+                <td>${customer.cust_email}</td>
+                <td>${customer.cust_mobile}</td>
+                <td>${customer.cust_cr_no}</td>
+                <td>${customer.cust_address}</td>
+                <td>${customer.cust_type}</td>
+                <td>
+                  <button class="btn btn-warning btn-sm">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteCustomer('${customer.cust_id}')">Delete</button>
+                </td>
+              `;
+              tableBody.appendChild(row);
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching customers:', error);
+        }
+      }
+
+      async function deleteCustomer(custId) {
+        if (!confirm('Are you sure you want to delete this customer?')) return;
+        try {
+          const response = await fetch(`http://84.46.240.24:8000/api/delete_customer/${custId}`, { method: 'DELETE' });
+          if (response.ok) {
+            alert('Customer deleted successfully!');
+            fetchCustomers();
+          }
+        } catch (error) {
+          console.error('Error deleting customer:', error);
+        }
+      }
+
+      fetchCustomers();
+
+      function filterCustomerTable() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#customerTableBody tr');
+        rows.forEach(row => {
+          const cells = Array.from(row.getElementsByTagName('td'));
+          const match = cells.some(cell => cell.textContent.toLowerCase().includes(query));
+          row.style.display = match ? '' : 'none';
+        });
+      }
+
+      function sortCustomerTable(column) {
+        // Sorting implementation (same as in Currency Management)
+      }
+    </script>
+  </body>
+</html>
