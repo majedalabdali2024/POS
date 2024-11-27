@@ -113,81 +113,85 @@
       </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-wide">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="itemModalLabel">Add/Edit Item</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <form id="itemForm" enctype="multipart/form-data">
-              <div class="row">
-                <div class="col-md-3 text-center">
-                  <label class="form-label">Item Image</label>
-                  <div class="image-upload-item large" onclick="uploadImage(this)">
-                    <img id="itemImagePreview" src="" alt="Item Image" />
-                    <input type="file" id="itemImageInput" style="display: none;" accept="image/*" onchange="previewImage(event, this)">
-                  </div>
+<!-- Modal -->
+<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-wide">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="itemModalLabel">Add/Edit Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="itemForm" enctype="multipart/form-data">
+          <div class="row">
+            <!-- صورة العنصر على اليسار -->
+            <div class="col-md-3 text-center">
+              <label class="form-label">Item Image</label>
+              <div class="image-upload-item large" onclick="uploadImage(this)">
+                <img id="itemImagePreview" src="" alt="Item Image" />
+                <input type="file" id="itemImageInput" style="display: none;" accept="image/*" onchange="previewImage(event, this)">
+              </div>
+            </div>
+            <!-- الحقول على اليمين -->
+            <div class="col-md-9">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="item-code" class="form-label">Item Code</label>
+                  <input class="form-control" id="item-code" type="text" placeholder="Item Code">
                 </div>
-                <div class="col-md-9">
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="id" class="form-label">id</label>
-                      <input class="form-control" id="id" type="text" name="id" placeholder="Item Name">
-                    </div>
-                      <div class="col-md-6">
-                        <label for="item-name" class="form-label">Item Name</label>
-                        <input class="form-control" id="item-name" type="text" name="item-name" placeholder="Item Name">
-                      </div>
-                      <div class="col-md-6">
-                        <label for="item-name-e" class="form-label">Item Name (English)</label>
-                        <input class="form-control" id="item-name-e" type="text" name="item-name-e" placeholder="Item Name (English)">
-                      </div>
-                    </div>                    
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="item-code" class="form-label">Item Code</label>
-                      <input class="form-control" id="item-code" type="text" placeholder="Item Code">
-                    </div>
-                    <div class="col-md-6">
-                      <label for="item-sku" class="form-label">SKU</label>
-                      <input class="form-control" id="item-sku" type="text" placeholder="SKU">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="item-cat" class="form-label">Category</label>
-                      <select class="form-select" id="item-cat">
-                        <option value="">Select Category</option>
-                      </select>
-                    </div>
-                    <div class="col-md-6">
-                      <label for="item-unit" class="form-label">Unit</label>
-                      <select class="form-select" id="item-unit">
-                        <option value="">Select Unit</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <div class="col-md-6">
-                      <label for="item-price" class="form-label">Price</label>
-                      <input class="form-control" id="item-price" type="number" step="0.01" placeholder="Price">
-                    </div>
-                  </div>
+                <div class="col-md-6">
+                  <label for="item-sku" class="form-label">SKU</label>
+                  <input class="form-control" id="item-sku" type="text" placeholder="SKU">
                 </div>
               </div>
-            </form>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="item-name" class="form-label">Item Name</label>
+                  <input class="form-control" id="item-name" type="text" name="item-name" placeholder="Item Name">
+                </div>
+                <div class="col-md-6">
+                  <label for="item-name-e" class="form-label">Item Name (English)</label>
+                  <input class="form-control" id="item-name-e" type="text" name="item-name-e" placeholder="Item Name (English)">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="item-cat" class="form-label">Category</label>
+                  <select class="form-select" id="item-cat">
+                    <option value="">Select Category</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="item-unit" class="form-label">Unit</label>
+                  <select class="form-select" id="item-unit">
+                    <option value="">Select Unit</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="item-price" class="form-label">Price</label>
+                  <input class="form-control" id="item-price" type="number" step="0.01" placeholder="Price">
+                </div>
+              </div>
+              <!-- حقل ID مخفي -->
+              <div class="row mb-3" style="display: none;">
+                <div class="col-md-6">
+                  <label for="id" class="form-label">ID</label>
+                  <input class="form-control" id="id" type="text" name="id" placeholder="ID">
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button id="saveButton" class="btn btn-primary" type="button" onclick="saveData()">Save</button>
-          </div>
-        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button id="saveButton" class="btn btn-primary" type="button" onclick="saveData()">Save</button>
       </div>
     </div>
+  </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -267,7 +271,7 @@ async function saveData() {
   formData.append('item_price', itemPrice);
   formData.append('cat', itemCat);
   formData.append('unit', itemUnit);
-  formData.append('item_img', itemImg); // إضافة الصورة
+  formData.append('item_img', itemImg); // إضافة الصورة كملف
 
   const url = id
     ? `http://84.46.240.24:8000/api/api_update_item/${id}`
@@ -294,6 +298,7 @@ async function saveData() {
     alert('An error occurred while saving the item.');
   }
 }
+
 
 
 // Preview item details
