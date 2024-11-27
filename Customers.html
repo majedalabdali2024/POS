@@ -115,9 +115,9 @@
               <th scope="col" onclick="sortTable('cust_status')" class="sortable">
                 Status <i class="fas fa-sort"></i>
               </th>
-              <th scope="col"></th>
+              <th scope="col">Actions</th>
             </tr>
-          </thead>
+          </thead>          
           <tbody id="customerTableBody">
             <tr>
               <td colspan="7" class="text-center">Loading data...</td>
@@ -159,6 +159,24 @@
                   <input class="form-control" id="mobile" type="text" name="mobile" placeholder="Mobile">
                 </div>
                 <div class="col-md-6 mb-3">
+                  <label for="cr-no" class="form-label">CR No</label>
+                  <input class="form-control" id="cr-no" type="number" name="cr-no" placeholder="CR No">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="address" class="form-label">Address</label>
+                  <input class="form-control" id="address" type="text" name="address" placeholder="Address">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="action" class="form-label">Action</label>
+                  <input class="form-control" id="action" type="text" name="action" placeholder="Action">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="account" class="form-label">Account</label>
+                  <select class="form-select" id="account" name="account">
+                    <option value="">Select an Account</option>
+                  </select>
+                </div>                                
+                <div class="col-md-6 mb-3">
                   <label for="cust-status" class="form-label d-flex justify-content-between align-items-center">
                     <span>Status</span>
                     <input class="form-check-input" id="cust-status" type="checkbox" name="cust-status">
@@ -197,104 +215,118 @@
       }
 
       async function saveData() {
-        const custName = document.getElementById('cust-name').value;
-        const custNamee = document.getElementById('cust-name-e').value;
-        const vatNo = document.getElementById('vat-no').value;
-        const email = document.getElementById('email').value;
-        const mobile = document.getElementById('mobile').value;
-        const custStatus = document.getElementById('cust-status').checked;
+  const custName = document.getElementById('cust-name').value;
+  const custNamee = document.getElementById('cust-name-e').value;
+  const vatNo = document.getElementById('vat-no').value;
+  const email = document.getElementById('email').value;
+  const mobile = document.getElementById('mobile').value;
+  const crNo = document.getElementById('cr-no').value;
+  const address = document.getElementById('address').value;
+  const action = document.getElementById('action').value;
+  const account = document.getElementById('account').value;
+  const custStatus = document.getElementById('cust-status').checked;
 
-        const data = {
-          cust_name: custName,
-          cust_name_e: custNamee,
-          vat_no: vatNo,
-          email: email,
-          mobile: mobile,
-          cust_status: custStatus
-        };
+  const data = {
+    cust_name: custName,
+    cust_name_e: custNamee,
+    vat_no: vatNo,
+    email: email,
+    mobile: mobile,
+    cr_no: crNo,
+    address: address,
+    action: action,
+    acc: account,
+    cust_status: custStatus,
+  };
 
-        const url = isEditMode
-          ? `http://84.46.240.24:8000/api/api_update_customer/${currentCustomerId}`
-          : 'http://84.46.240.24:8000/api/api_create_customer';
+  const url = isEditMode
+    ? `http://84.46.240.24:8000/api/api_update_customer/${currentCustomerId}`
+    : 'http://84.46.240.24:8000/api/api_create_customer';
 
-        const method = isEditMode ? 'PUT' : 'POST';
+  const method = isEditMode ? 'PUT' : 'POST';
 
-        try {
-          const response = await fetch(url, {
-            method: method,
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          });
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-          if (response.ok) {
-            alert(isEditMode ? 'Customer updated successfully!' : 'Customer saved successfully!');
-            fetchCustomers();
-            document.getElementById('customerForm').reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
-            modal.hide();
-          } else {
-            alert('Failed to save customer.');
-            console.error('Error:', await response.text());
-          }
-        } catch (error) {
-          console.error('Request failed:', error);
-          alert('An error occurred while saving the customer.');
-        }
-      }
+    if (response.ok) {
+      alert(isEditMode ? 'Customer updated successfully!' : 'Customer saved successfully!');
+      fetchCustomers();
+      document.getElementById('customerForm').reset();
+      const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
+      modal.hide();
+    } else {
+      const errorText = await response.text();
+      console.error('Failed to save customer:', errorText);
+      alert('Failed to save customer: ' + errorText);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+    alert('An error occurred while saving the customer.');
+  }
+}
 
-      async function fetchCustomers() {
-        try {
-          const response = await fetch('http://84.46.240.24:8000/api/customers_list');
-          if (response.ok) {
-            const customers = await response.json();
-            const tableBody = document.getElementById('customerTableBody');
-            tableBody.innerHTML = '';
-            customers.forEach((customer) => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${customer.cust_name}</td>
-                <td>${customer.cust_name_e}</td>
-                <td>${customer.vat_no}</td>
-                <td>${customer.email}</td>
-                <td>${customer.mobile}</td>
-                <td><input type="checkbox" ${customer.cust_status ? 'checked' : ''} disabled></td>
-                <td>
-                  <button class="btn btn-sm" style="color:gray" onclick='enableEdit(${JSON.stringify(customer)})'> 
-                    <i class="fas fa-edit"></i> 
-                  </button>
-                  <button class="btn btn-sm" style="color:#41A5EE" onclick='previewCustomer(${JSON.stringify(customer)})'> 
-                    <i class="fas fa-eye"></i> 
-                  </button>
-                  <button class="btn btn-sm" style="color:red" onclick="deleteCustomer('${customer.id}')"> 
-                    <i class="fas fa-trash"></i> 
-                  </button>
-                </td>
-              `;
-              tableBody.appendChild(row);
-            });
-          } else {
-            console.error('Failed to fetch customers:', await response.text());
-          }
-        } catch (error) {
-          console.error('Error fetching customers:', error);
-        }
-      }
+
+async function fetchCustomers() {
+  try {
+    const response = await fetch('http://84.46.240.24:8000/api/customers_list');
+    if (response.ok) {
+      const customers = await response.json();
+      const tableBody = document.getElementById('customerTableBody');
+      tableBody.innerHTML = '';
+      customers.forEach((customer) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${customer.cust_name}</td>
+          <td>${customer.cust_name_e}</td>
+          <td>${customer.vat_no}</td>
+          <td>${customer.email}</td>
+          <td>${customer.mobile}</td>
+          <td><input type="checkbox" ${customer.cust_status ? 'checked' : ''} disabled></td>
+          <td>
+            <button class="btn btn-sm" style="color:gray" onclick='enableEdit(${JSON.stringify(customer)})'> 
+              <i class="fas fa-edit"></i> 
+            </button>
+            <button class="btn btn-sm" style="color:#41A5EE" onclick='previewCustomer(${JSON.stringify(customer)})'> 
+              <i class="fas fa-eye"></i> 
+            </button>
+            <button class="btn btn-sm" style="color:red" onclick="deleteCustomer('${customer.id}')"> 
+              <i class="fas fa-trash"></i> 
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    } else {
+      console.error('Failed to fetch customers:', await response.text());
+    }
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+  }
+}
 
       function previewCustomer(customer) {
-        document.getElementById('cust-name').value = customer.cust_name;
-        document.getElementById('cust-name-e').value = customer.cust_name_e;
-        document.getElementById('vat-no').value = customer.vat_no;
-        document.getElementById('email').value = customer.email;
-        document.getElementById('mobile').value = customer.mobile;
-        document.getElementById('cust-status').checked = customer.cust_status;
-        disableFormFields(true);
-        isEditMode = true;
-        currentCustomerId = customer.id;
-        const modal = new bootstrap.Modal(document.getElementById('customerModal'));
-        modal.show();
-      }
+  document.getElementById('cust-name').value = customer.cust_name;
+  document.getElementById('cust-name-e').value = customer.cust_name_e;
+  document.getElementById('vat-no').value = customer.vat_no;
+  document.getElementById('email').value = customer.email;
+  document.getElementById('mobile').value = customer.mobile;
+  document.getElementById('cr-no').value = customer.cr_no;
+  document.getElementById('address').value = customer.address;
+  document.getElementById('action').value = customer.action;
+  document.getElementById('account').value = customer.acc || ''; // تعيين الحساب
+  document.getElementById('cust-status').checked = customer.cust_status;
+  disableFormFields(true);
+  isEditMode = true;
+  currentCustomerId = customer.id;
+  const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+  modal.show();
+}
 
       function disableFormFields(disable) {
         const formFields = document.querySelectorAll('#customerForm input');
@@ -309,6 +341,10 @@
         document.getElementById('vat-no').value = customer.vat_no;
         document.getElementById('email').value = customer.email;
         document.getElementById('mobile').value = customer.mobile;
+        document.getElementById('address').value = customer.address;
+        document.getElementById('cr-no').value = customer.cr_no;
+        document.getElementById('action').value = customer.action;
+        document.getElementById('account').value = customer.acc || '';
         document.getElementById('cust-status').checked = customer.cust_status;
 
         // Enable the form for editing
@@ -334,6 +370,7 @@
           if (response.ok) {
             alert('Customer deleted successfully!');
             fetchCustomers();
+            
           } else {
             alert('Failed to delete customer.');
             console.error('Error:', await response.text());
@@ -389,6 +426,31 @@
 
       // Fetch and display customers on page load
       fetchCustomers();
+      fetchAccounts();
+
+      async function fetchAccounts() {
+      try {
+      const response = await fetch('http://84.46.240.24:8000/api/accounts_list');
+      if (response.ok) {
+      const accounts = await response.json();
+      const accountSelect = document.getElementById('account');
+      accountSelect.innerHTML = '<option value="">Select an Account</option>';
+      accounts
+        .filter(account => account.acc_level === 5) // الحسابات في المستوى الخامس فقط
+        .forEach(account => {
+          const option = document.createElement('option');
+          option.value = account.id;
+          option.textContent = account.acc_name;
+          accountSelect.appendChild(option);
+        });
+      } else {
+      console.error('Failed to fetch accounts:', await response.text());
+      }
+      } catch (error) {
+      console.error('Error fetching accounts:', error);
+      }
+      }
+
 
     </script>
   </body>
