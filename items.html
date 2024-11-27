@@ -69,13 +69,13 @@
 
       .image-upload-item.large .remove-btn {
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 9px;
+        right: 6px;
         background-color: #ff4d4d;
         color: white;
         border: none;
         border-radius: 50%;
-        font-size: 16px;
+        font-size: 12px;
         width: 30px;
         height: 30px;
         display: flex;
@@ -125,13 +125,11 @@
         <form id="itemForm" enctype="multipart/form-data">
           <div class="row">
             <!-- صورة العنصر على اليسار -->
-            <div class="col-md-3 text-center">
-              <label class="form-label">Item Image</label>
-              <div class="image-upload-item large" onclick="uploadImage(this)">
-                <img id="itemImagePreview" src="" alt="Item Image" />
-                <input type="file" id="itemImageInput" style="display: none;" accept="image/*" onchange="previewImage(event, this)">
-              </div>
-            </div>
+            <div class="image-upload-item large" onclick="uploadImage(this)">
+              <img id="itemImagePreview" src="" alt="Item Image" />
+              <input type="file" id="itemImageInput" style="display: none;" accept="image/*" onchange="previewImage(event, this)">
+              <button class="remove-btn" type="button" onclick="removeImage(event)">×</button>
+            </div>            
             <!-- الحقول على اليمين -->
             <div class="col-md-9">
               <div class="row mb-3">
@@ -194,7 +192,9 @@
 </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="pos_script.js" defer></script>  
     <script>
+     
 // Initial setup
 let isEditMode = false;
 
@@ -299,8 +299,6 @@ async function saveData() {
   }
 }
 
-
-
 // Preview item details
 function previewItem(item) {
   document.getElementById('id').value = item.id || '';
@@ -367,31 +365,16 @@ function previewImage(event, input) {
   reader.readAsDataURL(event.target.files[0]);
 }
 
-// Fetch categories for dropdown
-async function fetchCategories() {
-  const response = await fetch('http://84.46.240.24:8000/api/categories_list/');
-  const categories = await response.json();
-  const categorySelect = document.getElementById('item-cat');
-  categories.forEach((cat) => {
-    const option = document.createElement('option');
-    option.value = cat.id;
-    option.textContent = cat.name;
-    categorySelect.appendChild(option);
-  });
+function removeImage(event) {
+  event.stopPropagation(); // منع تفعيل حدث التحميل عند النقر على زر الحذف
+  const imagePreview = document.getElementById('itemImagePreview');
+  const imageInput = document.getElementById('itemImageInput');
+
+  // إعادة تعيين الصورة الافتراضية
+  imagePreview.src = '';
+  imageInput.value = ''; // إعادة تعيين المدخل
 }
 
-// Fetch units for dropdown
-async function fetchUnits() {
-  const response = await fetch('http://84.46.240.24:8000/api/units_list/');
-  const units = await response.json();
-  const unitSelect = document.getElementById('item-unit');
-  units.forEach((unit) => {
-    const option = document.createElement('option');
-    option.value = unit.id;
-    option.textContent = unit.name;
-    unitSelect.appendChild(option);
-  });
-}
 
 // Filter table data
 function filterTable() {
