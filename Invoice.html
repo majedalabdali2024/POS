@@ -156,6 +156,7 @@
         <div class="col-md-4">
             <label for="inv_id" class="form-label">رقم الفاتورة:</label>
             <input type="text" id="inv_id" class="form-control" readonly>
+            <input type="text" id="iid" class="form-control" readonly hidden>
         </div>
         <div class="col-md-4">
             <label for="inv_date" class="form-label">تاريخ الفاتورة:</label>
@@ -262,47 +263,52 @@
     function displayInvoice(index) {
     if (index >= 0 && index < invoices.length) {
         const invoice = invoices[index];
-        document.getElementById("inv_id").value = invoice.id || "غير متوفر";
-        document.getElementById("inv_date").value = new Date(invoice.inv_date).toLocaleString("ar-EG") || "غير متوفر";
+        document.getElementById("inv_id").value = invoice.inv_id || "غير متوفر";
+        document.getElementById("iid").value = invoice.id || "غير متوفر";
+        document.getElementById("inv_date").value = new Date(invoice.inv_date).toISOString().slice(0, 16) || "غير متوفر";
         document.getElementById("inv_type").value = invoice.inv_type === 1 ? "فاتورة بيع" : "نوع آخر";
-        document.getElementById("inv_amt").value = (invoice.inv_amt || "0") + " ريال";
+        document.getElementById("inv_amt").value = invoice.inv_amt || "0 ريال";
         document.getElementById("cust").value = invoice.cust || "";
         document.getElementById("acc").value = invoice.acc || "";
 
-        fetchInvoiceDetails(invoice.id); // جلب تفاصيل الفاتورة
-    }
-    }   
-
-        function displayInvoiceDetails(details) {
-        const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-        tableBody.innerHTML = ""; // تفريغ الجدول
-
-        details.forEach((detail, index) => {
-            const item = items.find(i => i.id === detail.itm_id) || { id: "غير متوفر", item_name: "غير متوفر" };
-            const qty = parseFloat(detail.itm_qty) || 0;
-            const price = parseFloat(detail.itm_price) || 0;
-            const taxRate = 0.15; // نسبة الضريبة 15%
-            const taxAmt = qty * price * taxRate; // قيمة الضريبة
-            const total = qty * price + taxAmt; // الإجمالي
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${item.item_name}</td>
-                <td>${qty}</td>
-                <td>${price.toFixed(2)}</td>
-                <td>${(taxRate * 100).toFixed(2)}%</td>
-                <td>${taxAmt.toFixed(2)}</td>
-                <td>${total.toFixed(2)}</td>
-                <td>
-                    <i class="bi bi-pencil-fill text-warning cursor-pointer mx-2" title="تعديل" onclick="editDetail(${index})"></i>
-                    <i class="bi bi-trash-fill text-danger cursor-pointer mx-2" title="حذف" onclick="removeDetailRow(${index})"></i>
-                </td>
-            `;
-            tableBody.appendChild(row);
+        // تحميل تفاصيل الفاتورة واستدعاء دالة الإجماليات
+        fetchInvoiceDetails().then(() => {
+            updateTotals(); // حساب الإجماليات بعد تحميل البيانات
         });
     }
+    }
 
+    function displayInvoiceDetails(details) {
+    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
+    tableBody.innerHTML = ""; // تفريغ الجدول
+
+    details.forEach((detail, index) => {
+        const item = items.find(i => i.id === detail.item) || { id: "غير متوفر", item_name: "غير متوفر" };
+        const qty = parseFloat(detail.item_qty) || 0;
+        const price = parseFloat(detail.item_price) || 0;
+        const taxRate = 0.15; // نسبة الضريبة 15%
+        const taxAmt = qty * price * taxRate; // قيمة الضريبة
+        const total = qty * price + taxAmt; // الإجمالي
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${item.item_name}</td>
+            <td>${qty}</td>
+            <td>${price.toFixed(2)}</td>
+            <td>${(taxRate * 100).toFixed(2)}%</td>
+            <td>${taxAmt.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+            <td>
+                <i class="bi bi-pencil-fill text-warning cursor-pointer mx-2" title="تعديل" onclick="editDetail(${index})"></i>
+                <i class="bi bi-trash-fill text-danger cursor-pointer mx-2" title="حذف" onclick="removeDetailRow(${index})"></i>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+
+    updateTotals(); // تحديث الإجماليات بعد عرض التفاصيل
+}
     
     // دالة تعبئة قائمة الخيارات
     async function populateSelect(apiUrl, selectId, valueField, textField) {
@@ -341,27 +347,30 @@
     
     // تحميل تفاصيل الفواتير
     async function fetchInvoiceDetails() {
-        try {
-            const allDetails = await fetchData('http://84.46.240.24:8000/api/invoices_dtl_list');
-            console.log("جميع تفاصيل الفواتير:", allDetails);
-    
-            const currentInvoiceId = parseInt(document.getElementById("inv_id").value);
-            console.log("رقم الفاتورة الحالي:", currentInvoiceId);
-    
-            const filteredDetails = allDetails.filter(detail => detail.inv === currentInvoiceId);
-            console.log("تفاصيل الفاتورة الحالية:", filteredDetails);
-    
-            displayInvoiceDetails(filteredDetails);
-        } catch (error) {
-            console.error("خطأ في جلب تفاصيل الفاتورة:", error);
-        }
+    try {
+        const allDetails = await fetchData('http://84.46.240.24:8000/api/invoices_dtl_list');
+        console.log("جميع تفاصيل الفواتير:", allDetails);
+
+        const currentInvoiceId = parseInt(document.getElementById("iid").value);
+        console.log("رقم الفاتورة الحالي:", currentInvoiceId);
+
+        const filteredDetails = allDetails.filter(detail => detail.inv === currentInvoiceId);
+        console.log("تفاصيل الفاتورة الحالية:", filteredDetails);
+
+        displayInvoiceDetails(filteredDetails);
+        updateTotals(); // تحديث الإجماليات بعد عرض التفاصيل
+    } catch (error) {
+        console.error("خطأ في جلب تفاصيل الفاتورة:", error);
     }
+}
+
     
     // عرض بيانات الفاتورة الرئيسية
     function displayInvoice(index) {
         if (index >= 0 && index < invoices.length) {
             const invoice = invoices[index];
-            document.getElementById("inv_id").value = invoice.id || "غير متوفر";
+            document.getElementById("inv_id").value = invoice.inv_id || "غير متوفر";
+            document.getElementById("iid").value = invoice.id || "غير متوفر";
             document.getElementById("inv_date").value = new Date(invoice.inv_date).toLocaleString("ar-EG") || "غير متوفر";
             document.getElementById("inv_type").value = invoice.inv_type === 1 ? "فاتورة بيع" : "نوع آخر";
             document.getElementById("inv_amt").value = (invoice.inv_amt || "0") + " ريال";
@@ -503,7 +512,7 @@
 
     const row = document.createElement("tr");
     const itemOptions = items.map(
-        item => `<option value="${item.id}" ${detail.itm_id == item.id ? "selected" : ""}>${item.item_name}</option>`
+        item => `<option value="${item.id}" ${detail.item_id == item.id ? "selected" : ""}>${item.item_name}</option>`
     ).join('');
 
     row.innerHTML = `
@@ -513,10 +522,10 @@
             <div class="autocomplete-dropdown" style="display: none;"></div>
         </td>
         <td>
-            <input type="number" class="form-control qty-input" placeholder="الكمية" oninput="updateTotals()" />
+            <input type="number" class="form-control qty-input" placeholder="الكمية" oninput="updateCalculations(this)" />
         </td>
         <td>
-            <input type="number" class="form-control price-input" placeholder="السعر" oninput="updateTotals()" />
+            <input type="number" class="form-control price-input" placeholder="السعر" oninput="updateCalculations(this)" />
         </td>
         <td>15.00%</td>
         <td class="tax-amount">0.00</td>
@@ -547,28 +556,22 @@
     // دالة لتحديث الحسابات عند إدخال الكمية أو السعر
     function updateCalculations(inputElement) {
     const row = inputElement.closest("tr");
-    const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-    const price = parseFloat(row.querySelector(".price-input").value) || 0;
-    const taxRate = 0.15;
+    const qty = parseFloat(row.querySelector(".qty-input").value) || 0; // الكمية
+    const price = parseFloat(row.querySelector(".price-input").value) || 0; // السعر
+    const taxRate = 0.15; // نسبة الضريبة 15%
 
     // حساب الضريبة والإجمالي
-    const taxAmt = qty * price * taxRate;
-    const totalAmt = qty * price + taxAmt;
+    const taxAmount = qty * price * taxRate; // قيمة الضريبة
+    const totalAmount = qty * price + taxAmount; // الإجمالي
 
-    // تحديث القيم في الأعمدة
-    row.querySelector(".tax-amount").textContent = taxAmt.toFixed(2);
-    row.querySelector(".total-amount").textContent = totalAmt.toFixed(2);
+    // تحديث القيم في الجدول
+    row.querySelector(".tax-amount").textContent = taxAmount.toFixed(2);
+    row.querySelector(".total-amount").textContent = totalAmount.toFixed(2);
 
-    // تحقق إذا كان هذا هو السطر الأخير وأضف سطرًا جديدًا إذا لزم الأمر
-    const tableBody = row.closest("tbody");
-    const rows = tableBody.querySelectorAll("tr");
-    if (row === rows[rows.length - 1]) {
-        addDetailRow();
-    }
-
-    // تحديث الإجماليات
+    // تحديث الإجماليات الكلية
     updateTotals();
     }
+
 
 
     function updateRowAndTotals() {
@@ -649,7 +652,7 @@
     // حفظ تفاصيل الفاتورة عند الحفظ
 // دالة لحفظ الفاتورة
 async function saveInvoice() {
-    const invoiceId = document.getElementById("inv_id").value;
+    const invoiceId = document.getElementById("iid").value;
     const invoiceData = {
         inv_id: invoiceId,
         inv_date: document.getElementById("inv_date").value,
@@ -701,9 +704,9 @@ async function saveInvoiceDetails(invoiceId) {
 
         details.push({
             inv: invoiceId,
-            itm_id: item.id,
-            itm_qty: qty,
-            itm_price: price
+            item_id: item.id,
+            item_qty: qty,
+            item_price: price
         });
     }
 
@@ -732,41 +735,60 @@ async function saveInvoiceDetails(invoiceId) {
     }
 }
 
+// تحويل التاريخ إلى التنسيق المطلوب
+function formatDateToISO(date) {
+    const isoDate = new Date(date).toISOString();
+    return isoDate.split(".")[0]; // إزالة المايكروثواني
+}
 
     
-    // تعديل الفاتورة
-    async function updateInvoice() {
-        const updatedInvoice = {
-            inv: document.getElementById("inv_id").value,
-            inv_date: document.getElementById("inv_date").value,
-            inv_type: document.getElementById("inv_type").value === "فاتورة بيع" ? 1 : 2,
-            inv_amt: document.getElementById("inv_amt").value,
-            cust: document.getElementById("cust").value,
-            acc: document.getElementById("acc").value
-        };
-    
-        console.log("القيم المرسلة لتعديل الفاتورة:", updatedInvoice);
-    
-        try {
-            const response = await fetch('http://84.46.240.24:8000/api/api_update_invoice', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedInvoice)
-            });
-    
-            if (response.ok) {
-                alert("تم تعديل الفاتورة بنجاح!");
-                await fetchInvoices();
-                displayInvoice(currentIndex);
-            } else {
-                const errorData = await response.json();
-                console.error("خطأ أثناء تعديل الفاتورة:", errorData);
-                alert("خطأ أثناء تعديل الفاتورة.");
-            }
-        } catch (error) {
-            console.error("خطأ في التعديل:", error);
+// تعديل الفاتورة
+async function updateInvoice() {
+    // البيانات الأساسية للفاتورة
+    const updatedInvoice = {
+        inv: document.getElementById("iid").value,
+        inv_date: document.getElementById("inv_date").value,
+        inv_type: document.getElementById("inv_type").value === "فاتورة بيع" ? 1 : 2,
+        inv_amt: document.getElementById("inv_amt").value,
+        cust: document.getElementById("cust").value,
+        acc: document.getElementById("acc").value
+    };
+
+    console.log("القيم المرسلة لتعديل الفاتورة:", updatedInvoice);
+
+    // اجعل الجدول قابلاً للتعديل
+    const tableRows = document.getElementById("invoice-details-table").querySelectorAll("tbody tr");
+    tableRows.forEach(row => {
+        row.querySelectorAll("input").forEach(input => {
+            input.disabled = false; // اجعل الحقول قابلة للتعديل
+        });
+    });
+
+    // السماح بإضافة أسطر جديدة
+    addDetailRow(); // إضافة سطر جديد عند التعديل
+
+    try {
+        // إرسال طلب تعديل الفاتورة إلى السيرفر
+        const response = await fetch('http://84.46.240.24:8000/api/api_update_invoice', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedInvoice)
+        });
+
+        if (response.ok) {
+            alert("تم تعديل الفاتورة بنجاح! يمكنك الآن تعديل تفاصيل الفاتورة في الجدول.");
+            await fetchInvoices();
+            displayInvoice(currentIndex);
+        } else {
+            const errorData = await response.json();
+            console.error("خطأ أثناء تعديل الفاتورة:", errorData);
+            alert("خطأ أثناء تعديل الفاتورة.");
         }
+    } catch (error) {
+        console.error("خطأ في التعديل:", error);
     }
+}
+
     
     // عند تحميل الصفحة
     document.addEventListener("DOMContentLoaded", async () => {
@@ -778,16 +800,17 @@ async function saveInvoiceDetails(invoiceId) {
 
         if (invoices.length > 0) {
             currentIndex = 0;
-            displayInvoice(currentIndex);
+            displayInvoice(currentIndex); // عرض أول فاتورة
         } else {
             alert("لا توجد فواتير لعرضها.");
         }
 
-        updateRecordCount();
+        updateRecordCount(); // تحديث عدد الفواتير
     } catch (error) {
         console.error("خطأ في تحميل البيانات:", error);
     }
-    });
+});
+
 
 
     // حفظ الفاتورة
@@ -947,30 +970,31 @@ document.addEventListener("DOMContentLoaded", function () {
     priceInputs.forEach(input => enforceNumericInput(input));
 });
 
-function updateTotals() {
-        const rows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-        let totalItems = rows.length;
-        let totalBeforeTax = 0;
-        let totalTax = 0;
+    function updateTotals() {
+    const rows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
 
-        for (let row of rows) {
-            const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-            const price = parseFloat(row.querySelector(".price-input").value) || 0;
-            const taxRate = 0.15;
-            const taxAmount = qty * price * taxRate;
+    let totalBeforeTax = 0; // إجمالي قبل الضريبة
+    let totalTax = 0; // إجمالي الضريبة
+    let totalAfterTax = 0; // الإجمالي بعد الضريبة
 
-            totalBeforeTax += qty * price;
-            totalTax += taxAmount;
-        }
+    for (let row of rows) {
+        const qty = parseFloat(row.querySelector(".qty-input").value) || 0; // الكمية
+        const price = parseFloat(row.querySelector(".price-input").value) || 0; // السعر
+        const taxRate = 0.15; // نسبة الضريبة
 
-        const totalAfterTax = totalBeforeTax + totalTax;
-
-        // تحديث القيم في الواجهة
-        document.getElementById("total-items").textContent = totalItems;
-        document.getElementById("total-before-tax").textContent = totalBeforeTax.toFixed(2);
-        document.getElementById("total-tax").textContent = totalTax.toFixed(2);
-        document.getElementById("total-after-tax").textContent = totalAfterTax.toFixed(2);
+        totalBeforeTax += qty * price; // جمع الإجمالي قبل الضريبة
+        totalTax += qty * price * taxRate; // جمع الضريبة
     }
+
+    totalAfterTax = totalBeforeTax + totalTax; // الإجمالي بعد الضريبة
+
+    // تحديث القيم في الواجهة
+    document.getElementById("total-before-tax").textContent = totalBeforeTax.toFixed(2) + " ريال";
+    document.getElementById("total-tax").textContent = totalTax.toFixed(2) + " ريال";
+    document.getElementById("total-after-tax").textContent = totalAfterTax.toFixed(2) + " ريال";
+    document.getElementById("total-items").textContent = rows.length; // عدد الأصناف
+    }
+
 
     document.addEventListener("DOMContentLoaded", function () {
     // تفعيل التلميحات
