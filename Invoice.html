@@ -6,190 +6,266 @@
     <title>تفاصيل الفاتورة</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="Style.css">
     
-
     <style>
+        body{
+            font-family: JannaLT;
+        }
         table {
             border-collapse: collapse;
         }
         th, td {
             text-align: center;
         }
-        table input {
-        width: 100%;
-        box-sizing: border-box;
-        text-align: center;
-        border: transparent;
-        }
-
-        table td {
-        padding: 0;
-        }
-
-        table th, table td {
-        vertical-align: middle;
-        }
         input, select {
             width: 100%;
             box-sizing: border-box;
             text-align: center;
         }
-        .fixed-bottom {
-        background-color: #f8f9fa; /* لون خلفية خفيف */
-        z-index: 1000; /* لضمان البقاء فوق العناصر الأخرى */
-        border-top: 1px solid #dee2e6; /* خط علوي خفيف */
+        .message {
+            display: none;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
-        .autocomplete-dropdown {
-        position: absolute;
-        z-index: 1050; /* لضمان ظهور القائمة فوق الجدول */
-        background-color: #fff;
-        border: 1px solid #ccc;
-        max-height: 200px;
-        overflow-y: auto;
-        width: auto;
+
+        footer {
+            text-align: center;
+            padding: 15px 0;
         }
 
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        footer .row div {
+            padding: 5px 0;
         }
-                /* إزالة الحدود للحقول */
-        table input[type="text"],
-        table input[type="number"] {
-            border: none; /* إزالة الحدود */
-            outline: none; /* إزالة الإطار عند التركيز */
+
+        .btn-sm {
+            margin: 0 2px;  
+        }
+
+        #loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* تنسيق مجموعة الأزرار */
+        .invoice-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+
+        /* تصميم الأزرار */
+        .invoice-controls .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 40%; /* أزرار دائرية */
+            font-size: 18px; /* حجم الأيقونات */
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* تأثير عند التمرير */
+        .invoice-controls .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ألوان مخصصة للأزرار */
+        .btn-success {
+            background-color: #fff;
+            color: #28a745;
+            border: transparent;
+        }
+
+        .btn-primary {
+            background-color: #fff;
+            color: #007bff;
+            border: transparent;
+        }
+
+        .btn-danger {
+            background-color: #fff;
+            color: #dc3545;
+            border: transparent;
+        }
+
+        .btn-light {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        #status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             text-align: center;
         }
 
-        table input[type="text"]:focus,
-        table input[type="number"]:focus {
-            border-bottom: 1px solid #ccc; /* يظهر خط سفلي عند التركيز */
-            outline: none;
+        .circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
         }
 
-        /* وضع الأزرار في الجانب الأيسر */
-        .button-group {
-            justify-content: flex-end !important;
+        .line {
+            flex: 1;
+            height: 2px;
+            background-color: #ccc;
+            transition: all 0.3s ease-in-out;
         }
 
-        /* إزالة الخلفية والحدود وتحسين التفاعل */
-        .icon-btn {
-            background: none;
-            border: none;
-            padding: 0.5rem;
-            cursor: pointer;
-            transition: transform 0.2s, color 0.2s;
+        .step.active .circle {
+            background-color: #007bff; /* لون الخطوة النشطة */
         }
 
-        /* تغيير اللون الافتراضي */
-        .icon-btn i {
-            color: #6c757d;
+        .step.completed .circle {
+            background-color: #28a745; /* لون الخطوة المكتملة */
         }
 
-        /* تأثير hover */
-        .icon-btn:hover i {
-            transform: scale(1.2);
+        .step.completed span {
+            color: #28a745;
         }
 
-        /* تأثير الضغط */
-        .icon-btn:active i {
-            transform: scale(1.1);
+        .step.active span {
+            color: #007bff;
         }
-
-        /* ألوان مخصصة حسب نوع الزر */
-        .icon-btn.first i { color: #007bff; }
-        .icon-btn.prev i { color: #6c757d; }
-        .icon-btn.next i { color: #6c757d; }
-        .icon-btn.last i { color: #007bff; }
-        .icon-btn.save i { color: #198754; }
-        .icon-btn.update i { color: #ffc107; }
-        .icon-btn.add i { color: #0d6efd; }
-        .icon-btn.delete i { color: #dc3545; }
-
-        /* تأثير hover مخصص لكل زر */
-        .icon-btn.first:hover i,
-        .icon-btn.last:hover i { color: #0056b3; }
-        .icon-btn.prev:hover i,
-        .icon-btn.next:hover i { color: #343a40; }
-        .icon-btn.save:hover i { color: #14532d; }
-        .icon-btn.update:hover i { color: #d39e00; }
-        .icon-btn.add:hover i { color: #084298; }
-        .icon-btn.delete:hover i { color: #7b1c1c; }
-
     </style>
 </head>
-<body class="container py-4">
-
-<h3 class="text-center mb-4"> الفاتورة</h3>
-<div class="d-flex justify-content-end align-items-center gap-3 mb-4 button-group">
-    <button id="first-btn" class="icon-btn first" onclick="navigateRecord('first')" data-bs-toggle="tooltip" data-bs-trigger="manual" title="أول سجل">
-        <i class="bi bi-skip-backward-fill fs-4"></i>
+<body class="container py-4">  
+<h3 class="text-right mb-4">الفاتورة</h3>
+<div id="status-indicator" class="d-flex justify-content-center align-items-center mb-3" style="display: none;">
+    <div class="step" id="step-1">
+        <div class="circle">1</div>
+        <span>قيد الإنشاء</span>
+    </div>
+    <div class="line"></div>
+    <div class="step" id="step-2">
+        <div class="circle">2</div>
+        <span>جاري الحفظ</span>
+    </div>
+    <div class="line"></div>
+    <div class="step" id="step-3">
+        <div class="circle">3</div>
+        <span>تم الحفظ</span>
+    </div>
+</div>
+<div class="invoice-controls d-flex gap-2">
+    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('last')" title="آخر فاتورة">
+        <i class="bi bi-skip-forward-fill"></i>
     </button>
-    <button id="prev-btn" class="icon-btn prev" onclick="navigateRecord('prev')" data-bs-toggle="tooltip" data-bs-trigger="manual" title="السابق">
-        <i class="bi bi-arrow-left-circle-fill fs-4"></i>
+    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('next')" title="الفاتورة التالية">
+        <i class="bi bi-chevron-right"></i>
     </button>
-    <button id="next-btn" class="icon-btn next" onclick="navigateRecord('next')" data-bs-toggle="tooltip" data-bs-trigger="manual" title="التالي">
-        <i class="bi bi-arrow-right-circle-fill fs-4"></i>
+    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('prev')" title="الفاتورة السابقة">
+        <i class="bi bi-chevron-left"></i>
     </button>
-    <button id="last-btn" class="icon-btn last" onclick="navigateRecord('last')" data-bs-toggle="tooltip" data-bs-trigger="manual" title="آخر سجل">
-        <i class="bi bi-skip-forward-fill fs-4"></i>
+    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('first')" title="أول فاتورة">
+        <i class="bi bi-skip-backward-fill"></i>
     </button>
-    <button id="save-btn" class="icon-btn save" onclick="saveInvoice()" data-bs-toggle="tooltip" data-bs-trigger="manual" title="حفظ">
-        <i class="bi bi-save-fill fs-4"></i>
+    <button id="save-btn" class="btn btn-success shadow-sm" onclick="saveInvoice()" title="حفظ">
+        <i class="bi bi-save-fill"></i>
     </button>
-    <button id="update-btn" class="icon-btn update" onclick="updateInvoice()" data-bs-toggle="tooltip" data-bs-trigger="manual" title="تعديل">
-        <i class="bi bi-pencil-square fs-4"></i>
+    <button id="new-invoice-btn" class="btn btn-primary shadow-sm" onclick="addNewInvoice()" title="فاتورة جديدة">
+        <i class="bi bi-file-earmark-plus-fill"></i>
     </button>
-    <button id="add-btn" class="icon-btn add" onclick="addNewInvoice()" data-bs-toggle="tooltip" data-bs-trigger="manual" title="إضافة فاتورة">
-        <i class="bi bi-plus-circle-fill fs-4"></i>
-    </button>
-    <button id="delete-btn" class="icon-btn delete" onclick="deleteInvoice()" data-bs-toggle="tooltip" data-bs-trigger="manual" title="حذف">
-        <i class="bi bi-trash-fill fs-4"></i>
+    <button id="delete-invoice-btn" class="btn btn-danger shadow-sm" onclick="deleteInvoice()" title="حذف الفاتورة">
+        <i class="bi bi-trash-fill"></i>
     </button>
 </div>
 
-<!-- عرض بيانات الفاتورة -->
 <div id="invoice-details" class="mb-4">
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <label for="id" class="form-label">رقم تسلسلي:</label>
+            <input type="text" id="id" class="form-control" readonly>
+        </div>
+        <div class="col-md-3">
             <label for="inv_id" class="form-label">رقم الفاتورة:</label>
             <input type="text" id="inv_id" class="form-control" readonly>
-            <input type="text" id="iid" class="form-control" readonly hidden>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="inv_date" class="form-label">تاريخ الفاتورة:</label>
-            <input type="text" id="inv_date" class="form-control" readonly>
+            <input type="datetime-local" id="inv_date" class="form-control" />
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="inv_type" class="form-label">نوع الفاتورة:</label>
-            <input type="text" id="inv_type" class="form-control" readonly>
+            <input type="text" id="inv_type" class="form-control" value="1" readonly>
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-md-4">
+        <div class="col-md-3" hidden>
             <label for="inv_amt" class="form-label">المبلغ:</label>
-            <input type="text" id="inv_amt" class="form-control" readonly>
+            <input type="text" id="inv_amt" class="form-control" value="0" readonly>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3" hidden>
+            <label for="inv_notes" class="form-label">ملاحظات:</label>
+            <input type="text" id="inv_notes" class="form-control" placeholder="إضافة ملاحظات...">
+        </div>
+        <div class="col-md-3" hidden>
+            <label for="commit" class="form-label"> حفظ:</label>
+            <input type="checkbox" id="commit" class="form-check-input" disabled>
+        </div>
+        <div class="col-md-3" hidden>
+            <label for="cr_date" class="form-label">تاريخ الإنشاء:</label>
+            <input type="datetime-local" id="cr_date" class="form-control" readonly>
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-md-6">
             <label for="cust" class="form-label">العميل:</label>
             <select id="cust" class="form-select">
                 <option value="">جاري التحميل...</option>
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <label for="acc" class="form-label">الحساب:</label>
-            <select id="acc" class="form-select">
+            <select id="acc" class="form-select" disabled>
                 <option value="">جاري التحميل...</option>
             </select>
         </div>
     </div>
 </div>
 
-<!-- جدول تفاصيل الفاتورة -->
 <div class="table-responsive mt-4">
-    <h4 class="text-center">تفاصيل الفاتورة</h4>
+    <!-- <h4 class="text-center">تفاصيل الفاتورة</h4> -->
     <table class="table table-bordered table-sm" id="invoice-details-table">
         <thead class="table-light">
             <tr>
@@ -197,8 +273,8 @@
                 <th>اسم الصنف</th>
                 <th>الكمية</th>
                 <th>السعر</th>
-                <th>نسبة الضريبة (15%)</th>
-                <th>قيمة الضريبة</th>
+                <th>نسبة الضريبة</th>
+                <th>الضريبة</th>
                 <th>الإجمالي</th>
                 <th>إجراءات</th>
             </tr>
@@ -208,43 +284,42 @@
         </tbody>
     </table>
 </div>
-
-<footer>
-    <footer class="fixed-bottom bg-light p-3 border-top">
-        <div class="row text-center">
-            <div class="col-md-3">
-                <strong>عدد الأصناف:</strong> <span id="total-items">0</span>
-            </div>
-            <div class="col-md-3">
-                <strong>إجمالي قبل الضريبة:</strong> <span id="total-before-tax">0.00</span> ريال
-            </div>
-            <div class="col-md-3">
-                <strong>إجمالي الضريبة المضافة:</strong> <span id="total-tax">0.00</span> ريال
-            </div>
-            <div class="col-md-3">
-                <strong>الصافي بعد الضريبة:</strong> <span id="total-after-tax">0.00</span> ريال
-            </div>
-            
-        </div>
-    </footer>
-    <div class="text-center mt-4">
-        <p id="record-count">عدد الفواتير: 0</p>
+<div id="loading-spinner" style="display: none; text-align: center; margin-top: 20px;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">جاري التحميل...</span>
     </div>
-    
+    <p>جاري التحميل...</p>
+</div>
+
+<footer class="fixed-bottom bg-light p-3 border-top">    
+    <div class="row text-center">
+        <div class="col-md-4">
+            <strong>إجمالي:</strong> <span id="total-amount">0.00</span> ريال
+        </div>
+        <div id="message-container" class="message"></div>
+
+    </div>
 </footer>
-
 <script>
-    // تخزين البيانات
-    let items = [];
-    let invoices = [];
-    let invoiceDetails = [];
-    let customers = [];
-    let accounts = [];
-    let currentIndex = 0;
-    
+// ***********************************************
+// المتغيرات العامة
+// ***********************************************
+let items = [];
+let invoices = [];
+let currentInvoiceIndex = 0;
+const itemCache = {}; // تخزين مؤقت للأصناف
+// ***********************************************
+// وظائف جلب البيانات من API
+// ***********************************************
+function showLoadingSpinner() {
+    document.getElementById("loading-spinner").style.display = "block";
+}
 
-    // دالة عامة لجلب البيانات
-    async function fetchData(apiUrl) {
+function hideLoadingSpinner() {
+    document.getElementById("loading-spinner").style.display = "none";
+}
+
+async function fetchData(apiUrl) {
     try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
@@ -253,768 +328,673 @@
         console.error(`Error fetching data from ${apiUrl}:`, error);
         return [];
     }
-    }   
-
-    function updateRecordCount() {
-    const recordCountElement = document.getElementById("record-count");
-    recordCountElement.textContent = `عدد الفواتير: ${invoices.length}`;
-    }
-
-    function displayInvoice(index) {
-    if (index >= 0 && index < invoices.length) {
-        const invoice = invoices[index];
-        document.getElementById("inv_id").value = invoice.inv_id || "غير متوفر";
-        document.getElementById("iid").value = invoice.id || "غير متوفر";
-        document.getElementById("inv_date").value = new Date(invoice.inv_date).toISOString().slice(0, 16) || "غير متوفر";
-        document.getElementById("inv_type").value = invoice.inv_type === 1 ? "فاتورة بيع" : "نوع آخر";
-        document.getElementById("inv_amt").value = invoice.inv_amt || "0 ريال";
-        document.getElementById("cust").value = invoice.cust || "";
-        document.getElementById("acc").value = invoice.acc || "";
-
-        // تحميل تفاصيل الفاتورة واستدعاء دالة الإجماليات
-        fetchInvoiceDetails().then(() => {
-            updateTotals(); // حساب الإجماليات بعد تحميل البيانات
-        });
-    }
-    }
-
-    function displayInvoiceDetails(details) {
-    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    tableBody.innerHTML = ""; // تفريغ الجدول
-
-    details.forEach((detail, index) => {
-        const item = items.find(i => i.id === detail.item) || { id: "غير متوفر", item_name: "غير متوفر" };
-        const qty = parseFloat(detail.item_qty) || 0;
-        const price = parseFloat(detail.item_price) || 0;
-        const taxRate = 0.15; // نسبة الضريبة 15%
-        const taxAmt = qty * price * taxRate; // قيمة الضريبة
-        const total = qty * price + taxAmt; // الإجمالي
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.item_name}</td>
-            <td>${qty}</td>
-            <td>${price.toFixed(2)}</td>
-            <td>${(taxRate * 100).toFixed(2)}%</td>
-            <td>${taxAmt.toFixed(2)}</td>
-            <td>${total.toFixed(2)}</td>
-            <td>
-                <i class="bi bi-pencil-fill text-warning cursor-pointer mx-2" title="تعديل" onclick="editDetail(${index})"></i>
-                <i class="bi bi-trash-fill text-danger cursor-pointer mx-2" title="حذف" onclick="removeDetailRow(${index})"></i>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    updateTotals(); // تحديث الإجماليات بعد عرض التفاصيل
 }
-    
-    // دالة تعبئة قائمة الخيارات
+
+async function fetchItems() {
+    try {
+        items = await fetchData('http://84.46.240.24:8000/api/items_list/');
+        console.log("Fetched items:", items);
+    } catch (error) {
+        console.error("Error fetching items:", error);
+    }
+}
+async function fetchInvoices() {
+    showLoadingSpinner(); // عرض مؤشر التحميل
+    try {
+        // جلب بيانات الفواتير من API
+        invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+
+        if (invoices.length > 0) {
+            // ترتيب الفواتير حسب `inv_id`
+            invoices.sort((a, b) => a.inv_id - b.inv_id);
+            console.log("الفواتير المرتبة:", invoices);
+        } else {
+            displayMessage("لا توجد فواتير متاحة.", "info");
+        }
+    } catch (error) {
+        console.error("خطأ أثناء جلب الفواتير:", error);
+        displayMessage("حدث خطأ أثناء جلب الفواتير.", "error");
+    } finally {
+        hideLoadingSpinner(); // إخفاء مؤشر التحميل
+        resetInvoiceForm(); // تصفير الحقول
+    }
+}
+
+
+    // تعبئة القوائم المنسدلة
     async function populateSelect(apiUrl, selectId, valueField, textField) {
         try {
             const data = await fetchData(apiUrl);
             const select = document.getElementById(selectId);
-    
-            select.innerHTML = '<option value="">اختر...</option>';
-            select.innerHTML += data
-                .map(item => `<option value="${item[valueField]}">${item[textField]}</option>`)
-                .join('');
+            select.innerHTML = '<option value="">اختر...</option>' + data.map(item =>
+                `<option value="${item[valueField]}">${item[textField]}</option>`).join('');
         } catch (error) {
             console.error(`Error populating select ${selectId}:`, error);
         }
     }
     
-    // تحميل بيانات الأصناف
-    async function fetchItems() {
-        try {
-            items = await fetchData('http://84.46.240.24:8000/api/items_list/');
-            console.log("تم تحميل بيانات الأصناف:", items);
-        } catch (error) {
-            console.error("خطأ في جلب بيانات الأصناف:", error);
-        }
-    }
-    
-    // تحميل بيانات الفواتير
-    async function fetchInvoices() {
-        try {
-            invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-            updateRecordCount();
-        } catch (error) {
-            console.error("خطأ في جلب بيانات الفواتير:", error);
-        }
-    }
-    
-    // تحميل تفاصيل الفواتير
-    async function fetchInvoiceDetails() {
+        // تعيين رقم الفاتورة تلقائيًا
+        async function setInvoiceNumber() {
     try {
-        const allDetails = await fetchData('http://84.46.240.24:8000/api/invoices_dtl_list');
-        console.log("جميع تفاصيل الفواتير:", allDetails);
-
-        const currentInvoiceId = parseInt(document.getElementById("iid").value);
-        console.log("رقم الفاتورة الحالي:", currentInvoiceId);
-
-        const filteredDetails = allDetails.filter(detail => detail.inv === currentInvoiceId);
-        console.log("تفاصيل الفاتورة الحالية:", filteredDetails);
-
-        displayInvoiceDetails(filteredDetails);
-        updateTotals(); // تحديث الإجماليات بعد عرض التفاصيل
+        const data = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+        const maxId = data.reduce((max, inv) => Math.max(max, inv.id || 0), 0); // الحصول على الرقم التسلسلي
+        const maxInvoiceId = data.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0); // الحصول على رقم الفاتورة
+        
+        document.getElementById("id").value = maxId + 1; // تعيين الرقم التسلسلي
+        document.getElementById("inv_id").value = maxInvoiceId + 1; // تعيين رقم الفاتورة
     } catch (error) {
-        console.error("خطأ في جلب تفاصيل الفاتورة:", error);
+        console.error("Error setting invoice number:", error);
+        document.getElementById("id").value = 1; // الرقم التسلسلي الافتراضي
+        document.getElementById("inv_id").value = 1; // رقم الفاتورة الافتراضي
     }
 }
 
     
-    // عرض بيانات الفاتورة الرئيسية
-    function displayInvoice(index) {
-        if (index >= 0 && index < invoices.length) {
-            const invoice = invoices[index];
-            document.getElementById("inv_id").value = invoice.inv_id || "غير متوفر";
-            document.getElementById("iid").value = invoice.id || "غير متوفر";
-            document.getElementById("inv_date").value = new Date(invoice.inv_date).toLocaleString("ar-EG") || "غير متوفر";
-            document.getElementById("inv_type").value = invoice.inv_type === 1 ? "فاتورة بيع" : "نوع آخر";
-            document.getElementById("inv_amt").value = (invoice.inv_amt || "0") + " ريال";
-            document.getElementById("cust").value = invoice.cust || "";
-            document.getElementById("acc").value = invoice.acc || "";
+    // جلب الحساب المرتبط بالعميل
+    async function setAccountForCustomer(customerId) {
+        try {
+            const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
+            const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
     
-            fetchInvoiceDetails();
+            const customer = customers.find(cust => cust.id == customerId);
+            if (customer) {
+                const account = accounts.find(acc => acc.id == customer.acc);
+                if (account) {
+                    document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
+                }
+            }
+        } catch (error) {
+            console.error("Error setting account for customer:", error);
         }
     }
 
-    function filterItems(inputElement) {
-    const dropdown = inputElement.nextElementSibling;
-    const filterValue = inputElement.value.toLowerCase();
+    function updateStatusIndicator(step) {
+        const statusIndicator = document.getElementById('status-indicator');
+        const steps = document.querySelectorAll('.step');
+        const lines = document.querySelectorAll('.line');
 
-    const filteredItems = items.filter(item =>
-        item.item_name.toLowerCase().includes(filterValue)
-    );
+        // إزالة الحالة النشطة والمكتملة من كل الخطوات
+        steps.forEach((stepElement, index) => {
+            stepElement.classList.remove('active', 'completed');
+            if (index < step - 1) {
+                stepElement.classList.add('completed'); // إضافة حالة مكتملة
+            } else if (index === step - 1) {
+                stepElement.classList.add('active'); // إضافة حالة نشطة
+            }
+        });
 
-    dropdown.innerHTML = filteredItems
-        .map(
-            item =>
-                `<div class="dropdown-item" onclick="selectItem(this, '${item.item_name}', '${item.id}')">${item.item_name}</div>`
-        )
-        .join('');
+        // تحديث الخطوط بين الخطوات
+        lines.forEach((line, index) => {
+            line.style.backgroundColor = index < step - 1 ? '#28a745' : '#ccc';
+        });
 
-    dropdown.style.display = filteredItems.length ? "block" : "none";
+        // إظهار شريط الحالة إذا كانت الخطوة > 0
+        statusIndicator.style.display = step > 0 ? 'flex' : 'none';
     }
 
-    function selectItem(dropdownItem, itemName, itemId) {
-    const input = dropdownItem.parentElement.previousElementSibling;
-    input.value = itemName; // عرض اسم الصنف
-    input.dataset.itemId = itemId; // تخزين رقم الصنف
-    dropdownItem.parentElement.style.display = "none";
-    }
-
-    function validateItem(inputElement) {
-    const itemName = inputElement.value.toLowerCase();
-    const matchedItem = items.find(item => item.item_name.toLowerCase() === itemName);
-
-    if (!matchedItem) {
-        alert("اسم الصنف غير صحيح. يرجى الاختيار من القائمة.");
-        inputElement.value = ""; // إعادة ضبط الحقل
-        inputElement.dataset.itemId = ""; // حذف رقم الصنف المخزن
-    } else {
-        inputElement.value = matchedItem.item_name; // تأكيد الاسم الصحيح
-        inputElement.dataset.itemId = matchedItem.id; // تخزين رقم الصنف
-    }
-    }
-
-
-
-    function addAutocompleteToCell(inputElement) {
-    // إنشاء قائمة الاقتراحات
-    const autocompleteList = document.createElement("div");
-    autocompleteList.classList.add("autocomplete-list");
-    autocompleteList.style.position = "absolute";
-    autocompleteList.style.zIndex = "1000";
-    autocompleteList.style.background = "#fff";
-    autocompleteList.style.border = "1px solid #ccc";
-    autocompleteList.style.maxHeight = "150px";
-    autocompleteList.style.overflowY = "auto";
-
-    // إدراج قائمة الاقتراحات بعد الحقل
-    inputElement.parentNode.style.position = "relative";
-    inputElement.parentNode.appendChild(autocompleteList);
-
-    // حدث عند الكتابة في الحقل
-    inputElement.addEventListener("input", function () {
-        const query = this.value.trim();
-        autocompleteList.innerHTML = ""; // تفريغ القائمة
-
-        if (query) {
-            const filteredItems = filterItems(query);
-            filteredItems.forEach(item => {
-                const div = document.createElement("div");
-                div.classList.add("autocomplete-item");
-                div.textContent = item.item_name;
-                div.dataset.id = item.id;
-
-                // عند اختيار الصنف
-                div.addEventListener("click", function () {
-                    inputElement.value = item.item_name; // تعيين اسم الصنف
-                    inputElement.dataset.itemId = item.id; // تخزين الـ id في الحقل
-                    autocompleteList.innerHTML = ""; // إخفاء القائمة
-                    console.log("تم اختيار الصنف:", item);
-                });
-
-                autocompleteList.appendChild(div);
-            });
-        }
+// ***********************************************
+// وظائف إنشاء الفواتير
+// ***********************************************
+async function addNewInvoice() {
+    // إعادة تمكين الحقول
+    document.querySelectorAll("#invoice-details input, #invoice-details select").forEach(input => {
+        input.disabled = false;
     });
 
-    // عرض كل الأصناف عند الضغط على F4
-    inputElement.addEventListener("keydown", function (event) {
-        if (event.key === "F4") {
-            event.preventDefault();
-            autocompleteList.innerHTML = ""; // تفريغ القائمة
+    // تصفير الحقول
+    resetInvoiceForm();
 
-            items.forEach(item => {
-                const div = document.createElement("div");
-                div.classList.add("autocomplete-item");
-                div.textContent = item.item_name;
-                div.dataset.id = item.id;
+    // تصفير جدول التفاصيل
+    clearInvoiceDetails();
 
-                // عند اختيار الصنف
-                div.addEventListener("click", function () {
-                    inputElement.value = item.item_name;
-                    inputElement.dataset.itemId = item.id;
-                    autocompleteList.innerHTML = ""; // إخفاء القائمة
-                    console.log("تم اختيار الصنف:", item);
-                });
+    // إضافة صف جديد فارغ
+    ensureLastRowExists();
 
-                autocompleteList.appendChild(div);
-            });
-        }
-    });
+    // تحديث شريط الحالة إلى "قيد الإنشاء"
+    updateStatusIndicator(1);
 
-    // إخفاء القائمة عند النقر خارج الحقل
-    document.addEventListener("click", function (event) {
-        if (!event.target.closest(".autocomplete-list") && event.target !== inputElement) {
-            autocompleteList.innerHTML = "";
-        }
-    });
-    }
+    // عرض رسالة نجاح
+    displayMessage("تم إنشاء فاتورة جديدة.", "success");
+}
 
-    function enableAutocompleteInTable() {
+
+// وظيفة تصفير الحقول وجعل الصفحة جاهزة للإدخال
+function resetInvoiceForm() {
+    document.getElementById("id").value = ""; // رقم تسلسلي فارغ
+    document.getElementById("inv_id").value = ""; // رقم فاتورة فارغ
+    document.getElementById("inv_date").value = ""; // تاريخ فارغ
+    document.getElementById("inv_type").value = "1"; // نوع الفاتورة الافتراضي
+    document.getElementById("inv_amt").value = "0.00"; // المبلغ الافتراضي
+    document.getElementById("inv_notes").value = ""; // ملاحظات فارغة
+    document.getElementById("commit").checked = false; // حالة الحفظ
+    document.getElementById("cust").value = ""; // العميل الافتراضي
+    document.getElementById("acc").value = ""; // الحساب الافتراضي
+
+    // مسح تفاصيل الفاتورة
+    clearInvoiceDetails();
+}
+
+function ensureLastRowExists() {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
+    const rows = Array.from(tableBody.rows);
 
-    tableBody.addEventListener("focusin", function (event) {
-        if (event.target.classList.contains("item-select")) {
-            addAutocompleteToCell(event.target);
-        }
-    });
+    if (rows.length === 0 || isRowFilled(rows[rows.length - 1])) {
+        addDetailRow();
     }
+}
 
-        // دالة لإضافة سطر جديد إلى الجدول
-        function addDetailRow(detail = {}) {
+function addDetailRow() {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-
     const row = document.createElement("tr");
-    const itemOptions = items.map(
-        item => `<option value="${item.id}" ${detail.item_id == item.id ? "selected" : ""}>${item.item_name}</option>`
-    ).join('');
+
+    const itemSelect = createItemSelect();
+    itemSelect.addEventListener("change", ensureLastRowExists);
 
     row.innerHTML = `
         <td>${tableBody.rows.length + 1}</td>
+        <td></td>
+        <td><input type="number" class="form-control item-qty" placeholder="الكمية" value="0" oninput="updateTotals(); ensureLastRowExists()"></td>
+        <td><input type="number" class="form-control item-price" placeholder="السعر" value="0.00" oninput="updateTotals(); ensureLastRowExists()"></td>
+        <td>15%</td>
+        <td class="item-tax">0.00</td>
+        <td class="item-total">0.00</td>
         <td>
-            <input type="text" class="form-control autocomplete-input" placeholder="اسم الصنف" oninput="filterItems(this)" />
-            <div class="autocomplete-dropdown" style="display: none;"></div>
-        </td>
-        <td>
-            <input type="number" class="form-control qty-input" placeholder="الكمية" oninput="updateCalculations(this)" />
-        </td>
-        <td>
-            <input type="number" class="form-control price-input" placeholder="السعر" oninput="updateCalculations(this)" />
-        </td>
-        <td>15.00%</td>
-        <td class="tax-amount">0.00</td>
-        <td class="total-amount">0.00</td>
-        <td>
-            <i class="bi bi-pencil-fill text-warning cursor-pointer mx-2" title="تعديل" onclick="editDetail(this)"></i>
-            <i class="bi bi-trash-fill text-danger cursor-pointer mx-2" title="حذف" onclick="removeDetailRow(this)"></i>
+            <button class="btn btn-primary btn-sm" onclick="editDetailRow(this)">تعديل</button>
+            <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)">حذف</button>
         </td>
     `;
 
+    row.cells[1].appendChild(itemSelect);
     tableBody.appendChild(row);
 }
 
+function editDetailRow(button) {
+    const row = button.closest("tr");
+    const qtyInput = row.querySelector(".item-qty");
+    const priceInput = row.querySelector(".item-price");
 
-    function navigateRecord(direction) {
-    if (direction === "first") {
-        currentIndex = 0;
-    } else if (direction === "last") {
-        currentIndex = invoices.length - 1;
-    } else if (direction === "prev" && currentIndex > 0) {
-        currentIndex--;
-    } else if (direction === "next" && currentIndex < invoices.length - 1) {
-        currentIndex++;
-    }
-    displayInvoice(currentIndex);
-    }
+    // السماح بتعديل القيم
+    qtyInput.disabled = false;
+    priceInput.disabled = false;
 
-    // دالة لتحديث الحسابات عند إدخال الكمية أو السعر
-    function updateCalculations(inputElement) {
-    const row = inputElement.closest("tr");
-    const qty = parseFloat(row.querySelector(".qty-input").value) || 0; // الكمية
-    const price = parseFloat(row.querySelector(".price-input").value) || 0; // السعر
-    const taxRate = 0.15; // نسبة الضريبة 15%
+    // تغيير الزر إلى "حفظ"
+    button.textContent = "حفظ";
+    button.className = "btn btn-success btn-sm";
+    button.onclick = function () {
+        saveDetailRow(row, button);
+    };
+}
 
-    // حساب الضريبة والإجمالي
-    const taxAmount = qty * price * taxRate; // قيمة الضريبة
-    const totalAmount = qty * price + taxAmount; // الإجمالي
+function saveDetailRow(row, button) {
+    const qtyInput = row.querySelector(".item-qty");
+    const priceInput = row.querySelector(".item-price");
 
-    // تحديث القيم في الجدول
-    row.querySelector(".tax-amount").textContent = taxAmount.toFixed(2);
-    row.querySelector(".total-amount").textContent = totalAmount.toFixed(2);
+    // منع التعديل
+    qtyInput.disabled = true;
+    priceInput.disabled = true;
 
-    // تحديث الإجماليات الكلية
+    // إعادة الزر إلى "تعديل"
+    button.textContent = "تعديل";
+    button.className = "btn btn-primary btn-sm";
+    button.onclick = function () {
+        editDetailRow(button);
+    };
+
+    // تحديث الإجماليات
     updateTotals();
-    }
+}
 
+function createItemSelect() {
+    const select = document.createElement("select");
+    select.className = "form-control item-select";
 
+    // تعبئة القائمة بأسماء الأصناف
+    select.innerHTML = '<option value="">اختر الصنف...</option>' + 
+        items.map(item => `<option value="${item.id}">${item.item_name}</option>`).join('');
 
-    function updateRowAndTotals() {
-        const row = this.closest("tr");
-        const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-        const price = parseFloat(row.querySelector(".price-input").value) || 0;
-        const taxRate = 0.15;
-        const taxAmount = qty * price * taxRate;
-        const total = qty * price + taxAmount;
+    select.addEventListener("change", ensureLastRowExists); // إضافة صف جديد عند تغيير القيمة
+    return select;
+}
+function isRowFilled(row) {
+    try {
+        const itemSelect = row.querySelector(".item-select");
+        const qtyInput = row.querySelector(".item-qty");
+        const priceInput = row.querySelector(".item-price");
 
-        row.cells[5].textContent = taxAmount.toFixed(2);
-        row.cells[6].textContent = total.toFixed(2);
-
-        updateTotals();
-    }
-
-    // تهيئة الجدول عند الفاتورة الجديدة
-    function initializeNewInvoice() {
-        const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-        tableBody.innerHTML = ""; // تفريغ الجدول
-        addDetailRow(); // إضافة سطر جديد
-    }
-
-    // دالة لحذف سطر من جدول تفاصيل الفاتورة
-    function removeDetailRow(button) {
-        const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-        const row = button.closest("tr");
-
-        // منع حذف آخر سطر
-        if (tableBody.rows.length <= 1) {
-            alert("لا يمكن حذف السطر الأخير.");
-            return;
+        if (!itemSelect || !qtyInput || !priceInput) {
+            console.warn("Invalid row structure detected, skipping...");
+            return false;
         }
 
-        row.remove();
-        updateRowNumbers();
+        const qty = parseFloat(qtyInput.value || 0);
+        const price = parseFloat(priceInput.value || 0);
 
-        // إذا أصبح الجدول فارغًا، أضف سطرًا جديدًا
-        if (tableBody.rows.length === 0) {
-            addDetailRow();
+        return itemSelect.value !== "" && qty > 0 && price > 0;
+    } catch (error) {
+        console.error("Error in isRowFilled:", error);
+        return false;
+    }
+}
+
+function updateTotals() {
+    const rows = document.querySelectorAll("#invoice-details-table tbody tr");
+    let totalBeforeTax = 0, totalTax = 0, totalAfterTax = 0;
+
+    for (const row of rows) {
+        const itemSelect = row.querySelector(".item-select");
+        const qtyInput = row.querySelector(".item-qty");
+        const priceInput = row.querySelector(".item-price");
+
+        // تجاهل الصف الأخير إذا كان غير مكتمل
+        if (!itemSelect || itemSelect.value === "" || qtyInput.value === "0" || priceInput.value === "0") {
+            console.log(`Skipping row ${row.rowIndex + 1}: Incomplete data`);
+            continue;
+        }
+
+        const qty = parseFloat(qtyInput?.value || 0);
+        const price = parseFloat(priceInput?.value || 0);
+        const tax = qty * price * 0.15;
+
+        row.querySelector(".item-tax").textContent = tax.toFixed(2);
+        row.querySelector(".item-total").textContent = (qty * price + tax).toFixed(2);
+
+        totalBeforeTax += qty * price;
+        totalTax += tax;
+    }
+
+    totalAfterTax = totalBeforeTax + totalTax;
+    document.getElementById("total-amount").textContent = totalAfterTax.toFixed(2);
+    document.getElementById("inv_amt").value = totalAfterTax.toFixed(2);
+}
+
+
+
+
+function updateInvoiceAmount() {
+    const totalAmount = parseFloat(document.getElementById("total-amount").textContent) || 0;
+
+    // التحقق من الحد الأقصى للأرقام (6 أرقام بما في ذلك النقاط العشرية)
+    const formattedAmount = totalAmount > 999999 ? 999999.99 : totalAmount.toFixed(2);
+
+    document.getElementById("inv_amt").value = formattedAmount;
+}
+
+function validateInputs() {
+    const rows = document.querySelectorAll("#invoice-details-table tbody tr");
+    for (const row of rows) {
+        const itemSelect = row.querySelector(".item-select");
+        const qtyInput = row.querySelector(".item-qty");
+        const priceInput = row.querySelector(".item-price");
+
+        const qty = parseFloat(qtyInput?.value || 0);
+        const price = parseFloat(priceInput?.value || 0);
+
+        // تجاهل الصف الأخير إذا كان غير مكتمل
+        if (!itemSelect || itemSelect.value === "" || qty === 0 || price === 0) {
+            console.log(`Skipping row ${row.rowIndex + 1}: Incomplete data`);
+            continue;
+        }
+
+        // التحقق من الكمية والسعر
+        if (isNaN(qty) || qty <= 0) {
+            displayMessage(`الكمية في الصف ${row.rowIndex + 1} غير صالحة. يرجى إدخال قيمة أكبر من 0.`, "error");
+            return false;
+        }
+
+        if (isNaN(price) || price <= 0) {
+            displayMessage(`السعر في الصف ${row.rowIndex + 1} غير صالح. يرجى إدخال قيمة أكبر من 0.`, "error");
+            return false;
         }
     }
+    return true;
+}
 
-    // تحديث أرقام الصفوف في الجدول
-    function updateRowNumbers() {
-    const rows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-    for (let i = 0; i < rows.length; i++) {
-        rows[i].cells[0].textContent = i + 1;
-    }
-    }
-
-
-    document.addEventListener("DOMContentLoaded", () => {
-    enableAutocompleteInTable();
-    initializeNewInvoice(); // بدء الفاتورة بسطر واحد
-    });
-
-
-    // تعديل زر إضافة فاتورة جديدة لتهيئة الجدول
-    function addNewInvoice() {
-    const newInvId = invoices.length > 0
-        ? Math.max(...invoices.map(inv => parseInt(inv.inv_id || 0))) + 1
-        : 1;
-
-    document.getElementById("inv_id").value = newInvId;
-    document.getElementById("inv_date").value = new Date().toISOString().slice(0, 16);
-    document.getElementById("inv_type").value = "فاتورة بيع";
-    document.getElementById("inv_amt").value = "0.00 ريال";
-    document.getElementById("cust").value = "";
-    document.getElementById("acc").value = "";
-
-    initializeNewInvoice(); // تفريغ الجدول وإضافة سطر جديد
-    // alert(`تم توليد فاتورة جديدة برقم ${newInvId}`);
-    }
-
-
-    
-    // حفظ تفاصيل الفاتورة عند الحفظ
-// دالة لحفظ الفاتورة
+// ***********************************************
+// وظائف حفظ الفواتير
+// ***********************************************
 async function saveInvoice() {
-    const invoiceId = document.getElementById("iid").value;
-    const invoiceData = {
-        inv_id: invoiceId,
-        inv_date: document.getElementById("inv_date").value,
-        inv_type: document.getElementById("inv_type").value === "فاتورة بيع" ? 1 : 2,
-        inv_amt: parseFloat(document.getElementById("total-after-tax").textContent) || 0,
-        cust: document.getElementById("cust").value,
-        acc: document.getElementById("acc").value
-    };
+    // تحديث شريط الحالة إلى "جاري الحفظ"
+    updateStatusIndicator(2); // جاري الحفظ
 
-    console.log("بيانات الفاتورة:", invoiceData);
+    // التحقق من صحة الإدخالات
+    if (!validateInputs()) {
+        displayMessage("يرجى التحقق من الحقول وإعادة المحاولة.", "error");
+        updateStatusIndicator(1); // العودة إلى "قيد الإنشاء" في حال وجود خطأ
+        return; // إيقاف العملية
+    }
+
+    showLoadingSpinner(); // عرض مؤشر التحميل
 
     try {
-        // حفظ الفاتورة
-        const invoiceResponse = await fetch('http://84.46.240.24:8000/api/api_create_invoice', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(invoiceData)
-        });
+        // تحديث المبلغ الإجمالي قبل الحفظ
+        updateInvoiceAmount(); // لحساب الإجمالي من الصفوف
 
-        if (invoiceResponse.ok) {
-            alert("تم حفظ الفاتورة بنجاح!");
+        // تجهيز بيانات الفاتورة للحفظ
+        const invoiceData = {
+            inv_id: document.getElementById("inv_id").value,
+            inv_date: new Date(document.getElementById("inv_date").value).toISOString(),
+            inv_type: "1",
+            inv_amt: parseFloat(document.getElementById("inv_amt").value).toFixed(2), // استخدام المبلغ المحسوب
+            inv_notes: document.getElementById("inv_notes").value || null,
+            inv_status: true,
+            commit: false,
+            cr_date: new Date().toISOString(),
+            cust: parseInt(document.getElementById("cust").value) || null,
+            acc: parseInt(document.getElementById("acc").value) || null
+        };
 
-            // حفظ تفاصيل الفاتورة
-            await saveInvoiceDetails(invoiceId);
-        } else {
-            console.error("خطأ أثناء حفظ الفاتورة:", await invoiceResponse.json());
-            alert("حدث خطأ أثناء حفظ الفاتورة.");
-        }
-    } catch (error) {
-        console.error("خطأ في حفظ الفاتورة:", error);
-        alert("تعذر حفظ الفاتورة.");
-    }
-}
+        console.log("Saving Invoice:", invoiceData);
 
-async function saveInvoiceDetails(invoiceId) {
-    const tableRows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-    const details = [];
-
-    for (const row of tableRows) {
-        const itemName = row.querySelector(".autocomplete-input").value.trim();
-        const item = items.find(i => i.item_name === itemName);
-        const qty = parseFloat(row.querySelector(".qty-input").value) || 0;
-        const price = parseFloat(row.querySelector(".price-input").value) || 0;
-
-        if (!item || qty <= 0 || price <= 0) {
-            console.warn(`خطأ في الصف: ${row.rowIndex + 1}`);
-            continue; // تجاهل الصفوف غير الصحيحة
-        }
-
-        details.push({
-            inv: invoiceId,
-            item_id: item.id,
-            item_qty: qty,
-            item_price: price
-        });
-    }
-
-    console.log("تفاصيل الفاتورة المراد حفظها:", details);
-
-    if (details.length === 0) {
-        alert("لا توجد تفاصيل لإضافتها.");
-        return;
-    }
-
-    try {
-        const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice_dtl', {
-            method: 'POST', // أو PATCH بناءً على إعدادات API
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(details)
-        });
-
-        if (response.ok) {
-            alert("تم حفظ تفاصيل الفاتورة بنجاح!");
-        } else {
-            console.error("خطأ أثناء حفظ تفاصيل الفاتورة:", await response.json());
-            alert("حدث خطأ أثناء حفظ تفاصيل الفاتورة.");
-        }
-    } catch (error) {
-        console.error("خطأ في حفظ تفاصيل الفاتورة:", error);
-    }
-}
-
-// تحويل التاريخ إلى التنسيق المطلوب
-function formatDateToISO(date) {
-    const isoDate = new Date(date).toISOString();
-    return isoDate.split(".")[0]; // إزالة المايكروثواني
-}
-
-    
-// تعديل الفاتورة
-async function updateInvoice() {
-    // البيانات الأساسية للفاتورة
-    const updatedInvoice = {
-        inv: document.getElementById("iid").value,
-        inv_date: document.getElementById("inv_date").value,
-        inv_type: document.getElementById("inv_type").value === "فاتورة بيع" ? 1 : 2,
-        inv_amt: document.getElementById("inv_amt").value,
-        cust: document.getElementById("cust").value,
-        acc: document.getElementById("acc").value
-    };
-
-    console.log("القيم المرسلة لتعديل الفاتورة:", updatedInvoice);
-
-    // اجعل الجدول قابلاً للتعديل
-    const tableRows = document.getElementById("invoice-details-table").querySelectorAll("tbody tr");
-    tableRows.forEach(row => {
-        row.querySelectorAll("input").forEach(input => {
-            input.disabled = false; // اجعل الحقول قابلة للتعديل
-        });
-    });
-
-    // السماح بإضافة أسطر جديدة
-    addDetailRow(); // إضافة سطر جديد عند التعديل
-
-    try {
-        // إرسال طلب تعديل الفاتورة إلى السيرفر
-        const response = await fetch('http://84.46.240.24:8000/api/api_update_invoice', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedInvoice)
-        });
-
-        if (response.ok) {
-            alert("تم تعديل الفاتورة بنجاح! يمكنك الآن تعديل تفاصيل الفاتورة في الجدول.");
-            await fetchInvoices();
-            displayInvoice(currentIndex);
-        } else {
-            const errorData = await response.json();
-            console.error("خطأ أثناء تعديل الفاتورة:", errorData);
-            alert("خطأ أثناء تعديل الفاتورة.");
-        }
-    } catch (error) {
-        console.error("خطأ في التعديل:", error);
-    }
-}
-
-    
-    // عند تحميل الصفحة
-    document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        items = await fetchData('http://84.46.240.24:8000/api/items_list/');
-        invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-        await populateSelect('http://84.46.240.24:8000/api/customers_list', 'cust', 'id', 'cust_name');
-        await populateSelect('http://84.46.240.24:8000/api/accounts_list', 'acc', 'id', 'acc_name');
-
-        if (invoices.length > 0) {
-            currentIndex = 0;
-            displayInvoice(currentIndex); // عرض أول فاتورة
-        } else {
-            alert("لا توجد فواتير لعرضها.");
-        }
-
-        updateRecordCount(); // تحديث عدد الفواتير
-    } catch (error) {
-        console.error("خطأ في تحميل البيانات:", error);
-    }
-});
-
-
-
-    // حفظ الفاتورة
-async function saveInvoice() {
-    const newInvoice = {
-        inv_id: document.getElementById("inv_id").value,
-        inv_date: document.getElementById("inv_date").value,
-        inv_type: document.getElementById("inv_type").value === "فاتورة بيع" ? 1 : 2,
-        inv_amt: document.getElementById("inv_amt").value.replace(" ريال", ""),
-        cust: document.getElementById("cust").value,
-        acc: document.getElementById("acc").value
-    };
-
-    console.log("القيم المرسلة لحفظ الفاتورة:", newInvoice);
-
-    try {
+        // إرسال طلب الحفظ إلى API
         const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newInvoice)
+            body: JSON.stringify(invoiceData),
         });
 
-        if (response.ok) {
-            alert("تم حفظ الفاتورة بنجاح!");
-            await fetchInvoices();
-            displayInvoice(invoices.length - 1); // عرض آخر فاتورة
-        } else {
+        if (!response.ok) {
             const errorData = await response.json();
-            console.error("خطأ أثناء حفظ الفاتورة:", errorData);
-            alert(`خطأ أثناء حفظ الفاتورة: ${JSON.stringify(errorData)}`);
+            console.error("API Error Response:", errorData);
+            throw new Error(`HTTP Error: ${response.status}`);
         }
+
+        const savedInvoice = await response.json();
+        displayMessage("تم حفظ الفاتورة بنجاح!", "success");
+
+        // تحديث حالة الحفظ
+        document.getElementById("commit").checked = true;
+        document.getElementById("commit").disabled = true;
+
+        // تحديث شريط الحالة إلى "تم الحفظ"
+        updateStatusIndicator(3);
+
+        // حفظ تفاصيل الفاتورة
+        await saveInvoiceDetails(savedInvoice.id);
     } catch (error) {
-        console.error("خطأ في حفظ الفاتورة:", error);
+        console.error("Error saving invoice:", error.message, error);
+        displayMessage("حدث خطأ أثناء حفظ الفاتورة. يرجى التحقق من البيانات.", "error");
+
+        // العودة إلى "قيد الإنشاء" في حال حدوث خطأ
+        updateStatusIndicator(1);
+    } finally {
+        hideLoadingSpinner(); // إخفاء مؤشر التحميل
     }
 }
+async function saveInvoiceDetails(invoiceId) {
+    const tableRows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
 
+    for (const row of tableRows) {
+        const itemSelect = row.querySelector(".item-select");
+        const qty = parseFloat(row.querySelector(".item-qty").value);
+        const price = parseFloat(row.querySelector(".item-price").value);
 
+        // التحقق من صحة البيانات
+        if (!itemSelect || !itemSelect.value || isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) {
+            console.warn(`Skipping invalid row: ${row.rowIndex + 1}`);
+            continue; // تخطي الصفوف الفارغة أو غير الصالحة
+        }
 
-// حذف الفاتورة
+        const detail = {
+            inv_dtl_id: row.rowIndex + 1, // معرف فريد لكل صف
+            item_qty: qty.toFixed(2), // الكمية
+            item_price: price.toFixed(2), // السعر
+            inv_tax: "15.00", // نسبة الضريبة
+            tax_amt: (qty * price * 0.15).toFixed(2), // قيمة الضريبة
+            inv_status: true, // حالة الفاتورة
+            cr_date: new Date().toISOString(), // تاريخ الإنشاء
+            inv: invoiceId, // رقم الفاتورة
+            item: parseInt(itemSelect.value), // معرف الصنف
+        };
+
+        console.log("Detail prepared for API:", detail);
+
+        try {
+            // إرسال كل صف كطلب منفصل
+            const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice_dtl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(detail),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("API Error Response:", errorData);
+                throw new Error(`Failed to create invoice detail for row ${row.rowIndex + 1}. Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log(`Row ${row.rowIndex + 1} saved successfully:`, result);
+        } catch (error) {
+            console.error(`Error saving row ${row.rowIndex + 1}:`, error.message, error);
+            displayMessage(`حدث خطأ أثناء حفظ الصف ${row.rowIndex + 1}. يرجى التحقق من البيانات.`, "error");
+        }
+    }
+
+    displayMessage("تم حفظ تفاصيل الفاتورة بنجاح!", "success");
+}
+
+// ***********************************************
+// وظائف حذف الفواتير
+// ***********************************************
 async function deleteInvoice() {
-    const invoiceId = document.getElementById("inv_id").value;
+    const invoiceId = document.getElementById("id").value;
 
-    if (!confirm("هل أنت متأكد من حذف هذه الفاتورة؟")) return;
+    // نافذة التأكيد
+    const confirmation = confirm("هل أنت متأكد أنك تريد حذف هذه الفاتورة؟ لن تتمكن من استعادتها لاحقًا.");
+    if (!confirmation) {
+        return; // إيقاف العملية إذا اختار المستخدم "إلغاء"
+    }
 
     try {
-        const response = await fetch(`http://84.46.240.24:8000/api/api_delete_invoice/${invoiceId}`, {
-            method: 'DELETE'
+        const detailsResponse = await fetch(`http://84.46.240.24:8000/api/invoices_dtl_list`);
+        if (!detailsResponse.ok) throw new Error(`HTTP Error: ${detailsResponse.status}`);
+        const details = await detailsResponse.json();
+
+        const detailsToDelete = details.filter(detail => detail.inv == invoiceId);
+
+        for (const detail of detailsToDelete) {
+            const deleteDetailResponse = await fetch(`http://84.46.240.24:8000/api/api_delete_invoice_dtl/${detail.id}`, {
+                method: 'DELETE',
+            });
+
+            if (!deleteDetailResponse.ok) {
+                const errorDetail = await deleteDetailResponse.json();
+                console.error(`Error deleting detail ID ${detail.id}:`, errorDetail);
+                throw new Error(`HTTP Error when deleting detail ID ${detail.id}: ${deleteDetailResponse.status}`);
+            }
+
+            console.log(`Invoice detail ID ${detail.id} deleted successfully.`);
+        }
+
+        const deleteInvoiceResponse = await fetch(`http://84.46.240.24:8000/api/api_delete_invoice/${invoiceId}`, {
+            method: 'DELETE',
         });
 
-        if (response.ok) {
-            alert("تم حذف الفاتورة بنجاح!");
-            await fetchInvoices();
-            currentIndex = Math.min(currentIndex, invoices.length - 1);
-            if (invoices.length > 0) {
-                displayInvoice(currentIndex);
-            } else {
-                alert("لا توجد فواتير لعرضها.");
-            }
-        } else {
-            alert("خطأ أثناء حذف الفاتورة.");
+        if (!deleteInvoiceResponse.ok) {
+            const errorInvoice = await deleteInvoiceResponse.json();
+            console.error("Error deleting invoice:", errorInvoice);
+            throw new Error(`HTTP Error when deleting invoice: ${deleteInvoiceResponse.status}`);
         }
+
+        displayMessage("تم حذف الفاتورة وجميع التفاصيل المرتبطة بها بنجاح.", "success");
+        addNewInvoice();
     } catch (error) {
-        console.error("خطأ في حذف الفاتورة:", error);
+        console.error("Error deleting invoice and details:", error.message, error);
+        displayMessage("حدث خطأ أثناء حذف الفاتورة أو التفاصيل المرتبطة بها.", "error");
     }
 }
 
-// تمكين التنقل بين خلايا الجدول باستخدام لوحة المفاتيح
-document.addEventListener("keydown", function (event) {
-    const activeElement = document.activeElement;
 
-    // التحقق مما إذا كان العنصر النشط هو داخل الجدول
-    if (activeElement.tagName === "INPUT" || activeElement.tagName === "SELECT") {
-        const currentCell = activeElement.closest("td");
-        const currentRow = currentCell.closest("tr");
-        const tableBody = currentRow.closest("tbody");
+function displayMessage(message, type) {
+    const messageContainer = document.getElementById("message-container");
 
-        const rowIndex = Array.from(tableBody.rows).indexOf(currentRow);
-        const cellIndex = Array.from(currentRow.cells).indexOf(currentCell);
+    // تحديد نوع الرسالة (نجاح أو خطأ)
+    messageContainer.textContent = message;
+    messageContainer.className = `message ${type}`;
+    messageContainer.style.display = "block";
 
-        // تحديد الخلية الهدف بناءً على الزر المضغوط
-        let targetRowIndex = rowIndex;
-        let targetCellIndex = cellIndex;
+    // إخفاء الرسالة بعد 5 ثوانٍ
+    setTimeout(() => {
+        messageContainer.style.display = "none";
+    }, 5000);
+}
 
-        switch (event.key) {
-            case "ArrowUp": // سهم للأعلى
-                targetRowIndex = rowIndex > 0 ? rowIndex - 1 : rowIndex;
-                break;
-            case "ArrowDown": // سهم للأسفل
-                targetRowIndex = rowIndex < tableBody.rows.length - 1 ? rowIndex + 1 : rowIndex;
-                break;
-            case "ArrowRight": // سهم لليمين
-                targetCellIndex = cellIndex > 0 ? cellIndex - 1 : cellIndex; // عكس الاتجاه
-                break;
-            case "ArrowLeft": // سهم لليسار
-                targetCellIndex = cellIndex < currentRow.cells.length - 1 ? cellIndex + 1 : cellIndex; // عكس الاتجاه
-                break;
-            default:
-                return; // تجاهل باقي الأزرار
-        }
-
-        // إذا تم العثور على الخلية الهدف، انقل التركيز إليها
-        const targetRow = tableBody.rows[targetRowIndex];
-        const targetCell = targetRow.cells[targetCellIndex];
-        const targetInput = targetCell.querySelector("input, select");
-
-        if (targetInput) {
-            event.preventDefault(); // منع السلوك الافتراضي
-            targetInput.focus(); // تركيز على العنصر داخل الخلية
-            targetInput.select(); // تحديد النص الموجود داخل الحقل
-        }
+// ***********************************************
+// وظائف التنقل بين الفواتير
+function navigateToInvoice(direction) {
+    if (invoices.length === 0) {
+        displayMessage("لا توجد فواتير متاحة.", "error");
+        return;
     }
-    });
 
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") {
-            const focusable = Array.from(
-                document.querySelectorAll("input, select")
-            ).filter(el => !el.disabled && el.offsetParent !== null);
+    console.log(`التنقل إلى الفاتورة: ${direction}`);
+    console.log(`الفهرس الحالي: ${currentInvoiceIndex}`);
 
-            const index = focusable.indexOf(document.activeElement);
-            if (index >= 0) {
-                const next = focusable[index + 1];
-                if (next) {
-                    e.preventDefault();
-                    next.focus();
-                }
+    switch (direction) {
+        case 'first':
+            currentInvoiceIndex = 0;
+            break;
+        case 'last':
+            currentInvoiceIndex = invoices.length - 1;
+            break;
+        case 'prev':
+            if (currentInvoiceIndex > 0) {
+                currentInvoiceIndex--;
+            } else {
+                displayMessage("أنت بالفعل في أول فاتورة.", "info");
+                return;
             }
-        }
-    });
+            break;
+        case 'next':
+            if (currentInvoiceIndex < invoices.length - 1) {
+                currentInvoiceIndex++;
+            } else {
+                displayMessage("أنت بالفعل في آخر فاتورة.", "info");
+                return;
+            }
+            break;
+        default:
+            displayMessage("اتجاه غير معروف.", "error");
+            return;
+    }
 
-
-function enforceNumericInput(inputElement) {
-    // التحقق عند الإدخال
-    inputElement.addEventListener("input", function () {
-        // السماح بالأرقام فقط (0-9) والنقطة العشرية
-        this.value = this.value.replace(/[^0-9.]/g, "");
-    });
-
-    // التحقق عند الضغط على المفاتيح
-    inputElement.addEventListener("keypress", function (event) {
-        const charCode = event.which || event.keyCode;
-        if (
-            charCode !== 46 && // السماح بالنقطة العشرية
-            (charCode < 48 || charCode > 57) // السماح بالأرقام فقط
-        ) {
-            event.preventDefault();
-        }
-    });
+    loadInvoice(currentInvoiceIndex);
 }
 
-// تطبيق الدالة على الكمية والسعر
-document.addEventListener("DOMContentLoaded", function () {
-    const qtyInputs = document.querySelectorAll(".qty-input"); // الحقول المخصصة للكمية
-    const priceInputs = document.querySelectorAll(".price-input"); // الحقول المخصصة للسعر
-
-    qtyInputs.forEach(input => enforceNumericInput(input));
-    priceInputs.forEach(input => enforceNumericInput(input));
-});
-
-    function updateTotals() {
-    const rows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-
-    let totalBeforeTax = 0; // إجمالي قبل الضريبة
-    let totalTax = 0; // إجمالي الضريبة
-    let totalAfterTax = 0; // الإجمالي بعد الضريبة
-
-    for (let row of rows) {
-        const qty = parseFloat(row.querySelector(".qty-input").value) || 0; // الكمية
-        const price = parseFloat(row.querySelector(".price-input").value) || 0; // السعر
-        const taxRate = 0.15; // نسبة الضريبة
-
-        totalBeforeTax += qty * price; // جمع الإجمالي قبل الضريبة
-        totalTax += qty * price * taxRate; // جمع الضريبة
+function loadInvoice(index) {
+    if (index < 0 || index >= invoices.length) {
+        displayMessage("الفاتورة غير موجودة.", "error");
+        return;
     }
 
-    totalAfterTax = totalBeforeTax + totalTax; // الإجمالي بعد الضريبة
+    const invoice = invoices[index];
+    console.log(`تحميل الفاتورة ذات الفهرس ${index}:`, invoice);
 
-    // تحديث القيم في الواجهة
-    document.getElementById("total-before-tax").textContent = totalBeforeTax.toFixed(2) + " ريال";
-    document.getElementById("total-tax").textContent = totalTax.toFixed(2) + " ريال";
-    document.getElementById("total-after-tax").textContent = totalAfterTax.toFixed(2) + " ريال";
-    document.getElementById("total-items").textContent = rows.length; // عدد الأصناف
+    // تعبئة الحقول بناءً على بيانات الفاتورة
+    document.getElementById("id").value = invoice.id || "";
+    document.getElementById("inv_id").value = invoice.inv_id || "";
+    document.getElementById("inv_date").value = new Date(invoice.inv_date).toISOString().slice(0, 16) || "";
+    document.getElementById("inv_type").value = invoice.inv_type || "";
+    document.getElementById("inv_amt").value = invoice.inv_amt || "0.00";
+    document.getElementById("inv_notes").value = invoice.inv_notes || "";
+    document.getElementById("commit").checked = invoice.commit || false;
+    document.getElementById("cust").value = invoice.cust || "";
+    document.getElementById("acc").value = invoice.acc || "";
+
+    // جلب وعرض تفاصيل الفاتورة
+    fetchInvoiceDetails(invoice.id);
+}
+
+async function fetchInvoiceDetails(invoiceId) {
+    try {
+        const response = await fetch('http://84.46.240.24:8000/api/invoices_dtl_list');
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const details = await response.json();
+
+        // تصفية التفاصيل بناءً على رقم الفاتورة
+        const invoiceDetails = details.filter(detail => detail.inv == invoiceId);
+        if (invoiceDetails.length === 0) {
+            console.warn(`لا توجد تفاصيل للفاتورة رقم ${invoiceId}.`);
+            clearInvoiceDetails(); // مسح التفاصيل إذا لم تكن هناك بيانات
+            return;
+        }
+
+        displayInvoiceDetails(invoiceDetails); // عرض التفاصيل
+    } catch (error) {
+        console.error("Error fetching invoice details:", error);
     }
+}
 
+function displayInvoiceDetails(details) {
+    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
+    tableBody.innerHTML = ""; // مسح الصفوف القديمة
 
-    document.addEventListener("DOMContentLoaded", function () {
-    // تفعيل التلميحات
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-        const tooltip = new bootstrap.Tooltip(tooltipTriggerEl, {
-            trigger: 'manual' // منع الإغلاق التلقائي
-        });
-
-        // عرض التلميح عند المرور أو الضغط
-        tooltipTriggerEl.addEventListener('mouseover', () => tooltip.show());
-        tooltipTriggerEl.addEventListener('focus', () => tooltip.show());
-        tooltipTriggerEl.addEventListener('mouseout', () => tooltip.show()); // يبقى ظاهرًا
-        tooltipTriggerEl.addEventListener('click', () => tooltip.show());
+    details.forEach((detail, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${getItemName(detail.item)}</td>
+            <td>${detail.item_qty}</td>
+            <td>${detail.item_price}</td>
+            <td>${detail.inv_tax}%</td>
+            <td>${detail.tax_amt}</td>
+            <td>${(parseFloat(detail.item_qty) * parseFloat(detail.item_price) + parseFloat(detail.tax_amt)).toFixed(2)}</td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)">حذف</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
     });
+
+    // تحديث الإجماليات
+    updateTotals();
+}
+
+function clearInvoiceDetails() {
+    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
+    tableBody.innerHTML = ""; // مسح كل الصفوف
+}
+
+// جلب اسم الصنف
+function getItemName(itemId) {
+    const item = items.find(i => i.id == itemId);
+    if (!item) {
+        console.warn(`الصنف غير موجود (ID: ${itemId})`);
+    }
+    return item ? item.item_name : "غير معروف";
+}
+
+// ***********************************************
+// وظائف العرض والتفاعل
+// ***********************************************
+function displayMessage(message, type) {
+    const messageContainer = document.getElementById("message-container");
+    messageContainer.textContent = message;
+    messageContainer.className = `message ${type}`;
+    messageContainer.style.display = "block";
+
+    setTimeout(() => {
+        messageContainer.style.display = "none";
+    }, 3000);
+}
+
+// تحميل البيانات عند تحميل الصفحة
+document.addEventListener("DOMContentLoaded", async () => {
+    await fetchItems(); // جلب بيانات الأصناف
+    await populateSelect('http://84.46.240.24:8000/api/customers_list', 'cust', 'id', 'cust_name');
+    await populateSelect('http://84.46.240.24:8000/api/accounts_list', 'acc', 'id', 'acc_name');
+    await fetchInvoices(); // جلب الفواتير
+    await setInvoiceNumber();
+
+    document.getElementById("cust").addEventListener("change", event => {
+        setAccountForCustomer(event.target.value);
+    });
+
+    ensureLastRowExists(); // إضافة صف جديد تلقائيًا
 });
 
-
-</script>    
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+</script>
 </body>
 </html>
