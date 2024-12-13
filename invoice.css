@@ -1,0 +1,206 @@
+    table {
+        border-collapse: collapse;
+    }
+    th, td {
+        text-align: center;
+    }
+    input, select {
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+    }
+    .message {
+        display: none;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+
+    footer {
+        text-align: center;
+        padding: 15px 0;
+    }
+
+    footer .row div {
+        padding: 5px 0;
+    }
+
+    .btn-sm {
+        margin: 0 2px;  
+    }
+
+    #loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* تنسيق مجموعة الأزرار */
+    .invoice-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1000;
+    }
+
+    /* تصميم الأزرار */
+    .invoice-controls .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border-radius: 40%; /* أزرار دائرية */
+        font-size: 18px; /* حجم الأيقونات */
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* تأثير عند التمرير */
+    .invoice-controls .btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ألوان مخصصة للأزرار */
+    .btn-success {
+        background-color: #fff;
+        color: #28a745;
+        border: transparent;
+    }
+
+    .btn-primary {
+        background-color: #fff;
+        color: #007bff;
+        border: transparent;
+    }
+
+    .btn-danger {
+        background-color: #fff;
+        color: #dc3545;
+        border: transparent;
+    }
+
+    .btn-light {
+        background-color: #f8f9fa;
+        color: #333;
+    }
+
+    #status-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin: 10px 0;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #ccc;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.5s ease, transform 0.5s ease;
+    }
+
+    .circle.completed {
+        background-color: #28a745; /* لون أخضر */
+        transform: scale(1.2); /* تكبير */
+    }
+
+    .circle.active {
+        background-color: #007bff; /* لون أزرق */
+        transform: scale(1.1);
+    }
+
+    .circle::after {
+        content: "✔";
+        display: none;
+        font-size: 16px;
+    }
+
+    .circle.completed::after {
+        display: block;
+    }
+
+    .line {
+        width: 100px;
+        height: 4px;
+        background-color: #ccc;
+        margin: 0 -50px;
+        z-index: -1;
+        transition: background-color 0.5s ease;
+    }
+
+    .step.completed .line {
+        background-color: #28a745; /* لون أخضر */
+    }
+
+    .step span {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .step.completed span {
+        color: #28a745; /* أخضر */
+    }
+
+    .step.active span {
+        color: #007bff; /* أزرق */
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield; /* لإزالة الأسهم في فايرفوكس */
+        appearance: textfield; /* لإزالة الأسهم في المتصفحات الأخرى */
+    }
+
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none; /* لإزالة الأسهم في كروم */
+        margin: 0; /* لإزالة الفراغات */
+    }
+
+    h3.mb-0, h4.mb-0 {
+        margin: 0;
+        display: inline-block;
+    }
+
+    .text-end {
+        margin-right: 10px; /* مسافة بسيطة بين النص والتاريخ */
+    }
+
+    #search-invoice {
+        max-width: 200px;
+        margin: 0 auto;
+    }
+    

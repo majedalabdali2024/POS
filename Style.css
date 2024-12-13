@@ -8,3 +8,33 @@
     font-family: JannaLT;
     src: url(Fonts/JannaLT-Regular.ttf);
 }
+
+body{
+    font-family: JannaLT; 
+}
+
+.btnfl {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* لون النص */
+    background-color: transparent; /* خلفية الزر */
+    border: none;
+    padding: 10px 20px; /* حجم الزر */
+    border-radius: 5px; /* حواف مستطيلة */
+    font-size: 16px; /* حجم الأيقونة */
+    cursor: pointer;
+    position: absolute;
+    top: 10px; /* محاذاة في أعلى الشريط */
+    right: 50%; /* محاذاة في المنتصف أفقياً */
+    transform: translateX(50%); /* تعويض المنتصف */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .btnfl:hover {
+    background-color: #343a408e;
+  }
+
+  .btnfl i {
+    margin: 0; 
+  }

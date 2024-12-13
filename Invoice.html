@@ -6,188 +6,38 @@
     <title>تفاصيل الفاتورة</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="Style.css">
-    
-    <style>
-        body{
-            font-family: JannaLT;
-        }
-        table {
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: center;
-        }
-        input, select {
-            width: 100%;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        .message {
-            display: none;
-            padding: 15px;
-            margin-top: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-
-        footer {
-            text-align: center;
-            padding: 15px 0;
-        }
-
-        footer .row div {
-            padding: 5px 0;
-        }
-
-        .btn-sm {
-            margin: 0 2px;  
-        }
-
-        #loading-spinner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* تنسيق مجموعة الأزرار */
-        .invoice-controls {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-        }
-
-        /* تصميم الأزرار */
-        .invoice-controls .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 40%; /* أزرار دائرية */
-            font-size: 18px; /* حجم الأيقونات */
-            transition: all 0.3s ease-in-out;
-        }
-
-        /* تأثير عند التمرير */
-        .invoice-controls .btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        /* ألوان مخصصة للأزرار */
-        .btn-success {
-            background-color: #fff;
-            color: #28a745;
-            border: transparent;
-        }
-
-        .btn-primary {
-            background-color: #fff;
-            color: #007bff;
-            border: transparent;
-        }
-
-        .btn-danger {
-            background-color: #fff;
-            color: #dc3545;
-            border: transparent;
-        }
-
-        .btn-light {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        #status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ccc;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .line {
-            flex: 1;
-            height: 2px;
-            background-color: #ccc;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .step.active .circle {
-            background-color: #007bff; /* لون الخطوة النشطة */
-        }
-
-        .step.completed .circle {
-            background-color: #28a745; /* لون الخطوة المكتملة */
-        }
-
-        .step.completed span {
-            color: #28a745;
-        }
-
-        .step.active span {
-            color: #007bff;
-        }
-    </style>
+    <link rel="stylesheet" href="invoice.css">
 </head>
 <body class="container py-4">  
-<h3 class="text-right mb-4">الفاتورة</h3>
-<div id="status-indicator" class="d-flex justify-content-center align-items-center mb-3" style="display: none;">
-    <div class="step" id="step-1">
-        <div class="circle">1</div>
-        <span>قيد الإنشاء</span>
-    </div>
-    <div class="line"></div>
-    <div class="step" id="step-2">
-        <div class="circle">2</div>
-        <span>جاري الحفظ</span>
-    </div>
-    <div class="line"></div>
-    <div class="step" id="step-3">
-        <div class="circle">3</div>
-        <span>تم الحفظ</span>
-    </div>
-</div>
+    <div class="d-flex justify-content-start align-items-center mb-4">
+        <h3 class="mb-0 me-3">فاتورة</h3>
+        <h4 id="invoice-type-text" class="mb-0 me-2" style="font-weight: normal; font-size: 25px;">--</h4>
+        <div class="text-end" style="font-size: 14px;">
+            <div><strong>#</strong> <span id="invoice-number">--</span></div>
+            <div><strong></strong> <span id="invoice-date">--</span></div>
+        </div>
+    </div>      
+    <div id="status-indicator">
+        <div class="step" id="step-1">
+            <div class="circle">1</div>
+            <span>قيد الإنشاء</span>
+            <div class="line"></div>
+        </div>
+        <div class="step" id="step-2">
+            <div class="circle">2</div>
+            <span>جاري الحفظ</span>
+            <div class="line"></div>
+        </div>
+        <div class="step" id="step-3">
+            <div class="circle">3</div>
+            <span>تم الحفظ</span>
+        </div>
+    </div>    
 <div class="invoice-controls d-flex gap-2">
+    <div class="col-md-3">
+        <input class="form-control" id="search-invoice" list="invoice-list" placeholder="اختر رقم الفاتورة...">
+        <datalist id="invoice-list"></datalist>
+    </div>   
     <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('last')" title="آخر فاتورة">
         <i class="bi bi-skip-forward-fill"></i>
     </button>
@@ -213,19 +63,15 @@
 
 <div id="invoice-details" class="mb-4">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3" hidden>
             <label for="id" class="form-label">رقم تسلسلي:</label>
             <input type="text" id="id" class="form-control" readonly>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3" hidden>
             <label for="inv_id" class="form-label">رقم الفاتورة:</label>
             <input type="text" id="inv_id" class="form-control" readonly>
         </div>
-        <div class="col-md-3">
-            <label for="inv_date" class="form-label">تاريخ الفاتورة:</label>
-            <input type="datetime-local" id="inv_date" class="form-control" />
-        </div>
-        <div class="col-md-3">
+        <div class="col-md-3" hidden>
             <label for="inv_type" class="form-label">نوع الفاتورة:</label>
             <input type="text" id="inv_type" class="form-control" value="1" readonly>
         </div>
@@ -235,9 +81,28 @@
             <label for="inv_amt" class="form-label">المبلغ:</label>
             <input type="text" id="inv_amt" class="form-control" value="0" readonly>
         </div>
-        <div class="col-md-3" hidden>
-            <label for="inv_notes" class="form-label">ملاحظات:</label>
-            <input type="text" id="inv_notes" class="form-control" placeholder="إضافة ملاحظات...">
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <label for="cust" class="form-label">العميل:</label>
+                <input class="form-control" id="cust" list="custlist" placeholder="اختر أو اكتب اسم العميل..." autocomplete="off">
+                <datalist id="custlist">
+
+                </datalist>                
+            </div>
+            <div class="col-md-3" >
+                <label for="inv_date" class="form-label">تاريخ الفاتورة:</label>
+                <input type="datetime-local" id="inv_date" class="form-control" />
+            </div>
+            <div class="col-md-6" >
+                <label for="inv_notes" class="form-label">ملاحظات:</label>
+                <input type="text" id="inv_notes" class="form-control" placeholder="إضافة ملاحظات...">
+            </div>
+            <div class="col-md-6" hidden>
+                <label for="acc" class="form-label">الحساب:</label>
+                <select id="acc" class="form-select" disabled>
+                    <option value="">يرجى اختيار عميل صحيح</option>
+                </select>
+            </div>            
         </div>
         <div class="col-md-3" hidden>
             <label for="commit" class="form-label"> حفظ:</label>
@@ -248,24 +113,9 @@
             <input type="datetime-local" id="cr_date" class="form-control" readonly>
         </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-md-6">
-            <label for="cust" class="form-label">العميل:</label>
-            <select id="cust" class="form-select">
-                <option value="">جاري التحميل...</option>
-            </select>
-        </div>
-        <div class="col-md-6">
-            <label for="acc" class="form-label">الحساب:</label>
-            <select id="acc" class="form-select" disabled>
-                <option value="">جاري التحميل...</option>
-            </select>
-        </div>
-    </div>
 </div>
 
 <div class="table-responsive mt-4">
-    <!-- <h4 class="text-center">تفاصيل الفاتورة</h4> -->
     <table class="table table-bordered table-sm" id="invoice-details-table">
         <thead class="table-light">
             <tr>
@@ -276,11 +126,11 @@
                 <th>نسبة الضريبة</th>
                 <th>الضريبة</th>
                 <th>الإجمالي</th>
-                <th>إجراءات</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            <!-- سيتم تعبئة الصفوف ديناميكيًا -->
+
         </tbody>
     </table>
 </div>
@@ -293,708 +143,24 @@
 
 <footer class="fixed-bottom bg-light p-3 border-top">    
     <div class="row text-center">
-        <div class="col-md-4">
-            <strong>إجمالي:</strong> <span id="total-amount">0.00</span> ريال
+        <div class="col-md-3">
+            <strong>عدد الأصناف:</strong> <span id="total-items">0</span>
+        </div>
+        <div class="col-md-3">
+            <strong>إجمالي قبل الضريبة:</strong> <span id="total-amount">0.00</span> ريال
+        </div>
+        <div class="col-md-3">
+            <strong>إجمالي الضريبة المضافة:</strong> <span id="total-tax">0.00</span> ريال
+        </div>
+        <div class="col-md-3">
+            <strong>الصافي بعد الضريبة:</strong> <span id="total-after-tax">0.00</span> ريال
+            <input type="hidden" id="inv_tax" value="0.00">
+            <input type="hidden" id="inv_net" value="0.00">
         </div>
         <div id="message-container" class="message"></div>
 
     </div>
 </footer>
-<script>
-// ***********************************************
-// المتغيرات العامة
-// ***********************************************
-let items = [];
-let invoices = [];
-let currentInvoiceIndex = 0;
-const itemCache = {}; // تخزين مؤقت للأصناف
-// ***********************************************
-// وظائف جلب البيانات من API
-// ***********************************************
-function showLoadingSpinner() {
-    document.getElementById("loading-spinner").style.display = "block";
-}
-
-function hideLoadingSpinner() {
-    document.getElementById("loading-spinner").style.display = "none";
-}
-
-async function fetchData(apiUrl) {
-    try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        return await response.json();
-    } catch (error) {
-        console.error(`Error fetching data from ${apiUrl}:`, error);
-        return [];
-    }
-}
-
-async function fetchItems() {
-    try {
-        items = await fetchData('http://84.46.240.24:8000/api/items_list/');
-        console.log("Fetched items:", items);
-    } catch (error) {
-        console.error("Error fetching items:", error);
-    }
-}
-async function fetchInvoices() {
-    showLoadingSpinner(); // عرض مؤشر التحميل
-    try {
-        // جلب بيانات الفواتير من API
-        invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-
-        if (invoices.length > 0) {
-            // ترتيب الفواتير حسب `inv_id`
-            invoices.sort((a, b) => a.inv_id - b.inv_id);
-            console.log("الفواتير المرتبة:", invoices);
-        } else {
-            displayMessage("لا توجد فواتير متاحة.", "info");
-        }
-    } catch (error) {
-        console.error("خطأ أثناء جلب الفواتير:", error);
-        displayMessage("حدث خطأ أثناء جلب الفواتير.", "error");
-    } finally {
-        hideLoadingSpinner(); // إخفاء مؤشر التحميل
-        resetInvoiceForm(); // تصفير الحقول
-    }
-}
-
-
-    // تعبئة القوائم المنسدلة
-    async function populateSelect(apiUrl, selectId, valueField, textField) {
-        try {
-            const data = await fetchData(apiUrl);
-            const select = document.getElementById(selectId);
-            select.innerHTML = '<option value="">اختر...</option>' + data.map(item =>
-                `<option value="${item[valueField]}">${item[textField]}</option>`).join('');
-        } catch (error) {
-            console.error(`Error populating select ${selectId}:`, error);
-        }
-    }
-    
-        // تعيين رقم الفاتورة تلقائيًا
-        async function setInvoiceNumber() {
-    try {
-        const data = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-        const maxId = data.reduce((max, inv) => Math.max(max, inv.id || 0), 0); // الحصول على الرقم التسلسلي
-        const maxInvoiceId = data.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0); // الحصول على رقم الفاتورة
-        
-        document.getElementById("id").value = maxId + 1; // تعيين الرقم التسلسلي
-        document.getElementById("inv_id").value = maxInvoiceId + 1; // تعيين رقم الفاتورة
-    } catch (error) {
-        console.error("Error setting invoice number:", error);
-        document.getElementById("id").value = 1; // الرقم التسلسلي الافتراضي
-        document.getElementById("inv_id").value = 1; // رقم الفاتورة الافتراضي
-    }
-}
-
-    
-    // جلب الحساب المرتبط بالعميل
-    async function setAccountForCustomer(customerId) {
-        try {
-            const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
-            const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
-    
-            const customer = customers.find(cust => cust.id == customerId);
-            if (customer) {
-                const account = accounts.find(acc => acc.id == customer.acc);
-                if (account) {
-                    document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
-                }
-            }
-        } catch (error) {
-            console.error("Error setting account for customer:", error);
-        }
-    }
-
-    function updateStatusIndicator(step) {
-        const statusIndicator = document.getElementById('status-indicator');
-        const steps = document.querySelectorAll('.step');
-        const lines = document.querySelectorAll('.line');
-
-        // إزالة الحالة النشطة والمكتملة من كل الخطوات
-        steps.forEach((stepElement, index) => {
-            stepElement.classList.remove('active', 'completed');
-            if (index < step - 1) {
-                stepElement.classList.add('completed'); // إضافة حالة مكتملة
-            } else if (index === step - 1) {
-                stepElement.classList.add('active'); // إضافة حالة نشطة
-            }
-        });
-
-        // تحديث الخطوط بين الخطوات
-        lines.forEach((line, index) => {
-            line.style.backgroundColor = index < step - 1 ? '#28a745' : '#ccc';
-        });
-
-        // إظهار شريط الحالة إذا كانت الخطوة > 0
-        statusIndicator.style.display = step > 0 ? 'flex' : 'none';
-    }
-
-// ***********************************************
-// وظائف إنشاء الفواتير
-// ***********************************************
-async function addNewInvoice() {
-    // إعادة تمكين الحقول
-    document.querySelectorAll("#invoice-details input, #invoice-details select").forEach(input => {
-        input.disabled = false;
-    });
-
-    // تصفير الحقول
-    resetInvoiceForm();
-
-    // تصفير جدول التفاصيل
-    clearInvoiceDetails();
-
-    // إضافة صف جديد فارغ
-    ensureLastRowExists();
-
-    // تحديث شريط الحالة إلى "قيد الإنشاء"
-    updateStatusIndicator(1);
-
-    // عرض رسالة نجاح
-    displayMessage("تم إنشاء فاتورة جديدة.", "success");
-}
-
-
-// وظيفة تصفير الحقول وجعل الصفحة جاهزة للإدخال
-function resetInvoiceForm() {
-    document.getElementById("id").value = ""; // رقم تسلسلي فارغ
-    document.getElementById("inv_id").value = ""; // رقم فاتورة فارغ
-    document.getElementById("inv_date").value = ""; // تاريخ فارغ
-    document.getElementById("inv_type").value = "1"; // نوع الفاتورة الافتراضي
-    document.getElementById("inv_amt").value = "0.00"; // المبلغ الافتراضي
-    document.getElementById("inv_notes").value = ""; // ملاحظات فارغة
-    document.getElementById("commit").checked = false; // حالة الحفظ
-    document.getElementById("cust").value = ""; // العميل الافتراضي
-    document.getElementById("acc").value = ""; // الحساب الافتراضي
-
-    // مسح تفاصيل الفاتورة
-    clearInvoiceDetails();
-}
-
-function ensureLastRowExists() {
-    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    const rows = Array.from(tableBody.rows);
-
-    if (rows.length === 0 || isRowFilled(rows[rows.length - 1])) {
-        addDetailRow();
-    }
-}
-
-function addDetailRow() {
-    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    const row = document.createElement("tr");
-
-    const itemSelect = createItemSelect();
-    itemSelect.addEventListener("change", ensureLastRowExists);
-
-    row.innerHTML = `
-        <td>${tableBody.rows.length + 1}</td>
-        <td></td>
-        <td><input type="number" class="form-control item-qty" placeholder="الكمية" value="0" oninput="updateTotals(); ensureLastRowExists()"></td>
-        <td><input type="number" class="form-control item-price" placeholder="السعر" value="0.00" oninput="updateTotals(); ensureLastRowExists()"></td>
-        <td>15%</td>
-        <td class="item-tax">0.00</td>
-        <td class="item-total">0.00</td>
-        <td>
-            <button class="btn btn-primary btn-sm" onclick="editDetailRow(this)">تعديل</button>
-            <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)">حذف</button>
-        </td>
-    `;
-
-    row.cells[1].appendChild(itemSelect);
-    tableBody.appendChild(row);
-}
-
-function editDetailRow(button) {
-    const row = button.closest("tr");
-    const qtyInput = row.querySelector(".item-qty");
-    const priceInput = row.querySelector(".item-price");
-
-    // السماح بتعديل القيم
-    qtyInput.disabled = false;
-    priceInput.disabled = false;
-
-    // تغيير الزر إلى "حفظ"
-    button.textContent = "حفظ";
-    button.className = "btn btn-success btn-sm";
-    button.onclick = function () {
-        saveDetailRow(row, button);
-    };
-}
-
-function saveDetailRow(row, button) {
-    const qtyInput = row.querySelector(".item-qty");
-    const priceInput = row.querySelector(".item-price");
-
-    // منع التعديل
-    qtyInput.disabled = true;
-    priceInput.disabled = true;
-
-    // إعادة الزر إلى "تعديل"
-    button.textContent = "تعديل";
-    button.className = "btn btn-primary btn-sm";
-    button.onclick = function () {
-        editDetailRow(button);
-    };
-
-    // تحديث الإجماليات
-    updateTotals();
-}
-
-function createItemSelect() {
-    const select = document.createElement("select");
-    select.className = "form-control item-select";
-
-    // تعبئة القائمة بأسماء الأصناف
-    select.innerHTML = '<option value="">اختر الصنف...</option>' + 
-        items.map(item => `<option value="${item.id}">${item.item_name}</option>`).join('');
-
-    select.addEventListener("change", ensureLastRowExists); // إضافة صف جديد عند تغيير القيمة
-    return select;
-}
-function isRowFilled(row) {
-    try {
-        const itemSelect = row.querySelector(".item-select");
-        const qtyInput = row.querySelector(".item-qty");
-        const priceInput = row.querySelector(".item-price");
-
-        if (!itemSelect || !qtyInput || !priceInput) {
-            console.warn("Invalid row structure detected, skipping...");
-            return false;
-        }
-
-        const qty = parseFloat(qtyInput.value || 0);
-        const price = parseFloat(priceInput.value || 0);
-
-        return itemSelect.value !== "" && qty > 0 && price > 0;
-    } catch (error) {
-        console.error("Error in isRowFilled:", error);
-        return false;
-    }
-}
-
-function updateTotals() {
-    const rows = document.querySelectorAll("#invoice-details-table tbody tr");
-    let totalBeforeTax = 0, totalTax = 0, totalAfterTax = 0;
-
-    for (const row of rows) {
-        const itemSelect = row.querySelector(".item-select");
-        const qtyInput = row.querySelector(".item-qty");
-        const priceInput = row.querySelector(".item-price");
-
-        // تجاهل الصف الأخير إذا كان غير مكتمل
-        if (!itemSelect || itemSelect.value === "" || qtyInput.value === "0" || priceInput.value === "0") {
-            console.log(`Skipping row ${row.rowIndex + 1}: Incomplete data`);
-            continue;
-        }
-
-        const qty = parseFloat(qtyInput?.value || 0);
-        const price = parseFloat(priceInput?.value || 0);
-        const tax = qty * price * 0.15;
-
-        row.querySelector(".item-tax").textContent = tax.toFixed(2);
-        row.querySelector(".item-total").textContent = (qty * price + tax).toFixed(2);
-
-        totalBeforeTax += qty * price;
-        totalTax += tax;
-    }
-
-    totalAfterTax = totalBeforeTax + totalTax;
-    document.getElementById("total-amount").textContent = totalAfterTax.toFixed(2);
-    document.getElementById("inv_amt").value = totalAfterTax.toFixed(2);
-}
-
-
-
-
-function updateInvoiceAmount() {
-    const totalAmount = parseFloat(document.getElementById("total-amount").textContent) || 0;
-
-    // التحقق من الحد الأقصى للأرقام (6 أرقام بما في ذلك النقاط العشرية)
-    const formattedAmount = totalAmount > 999999 ? 999999.99 : totalAmount.toFixed(2);
-
-    document.getElementById("inv_amt").value = formattedAmount;
-}
-
-function validateInputs() {
-    const rows = document.querySelectorAll("#invoice-details-table tbody tr");
-    for (const row of rows) {
-        const itemSelect = row.querySelector(".item-select");
-        const qtyInput = row.querySelector(".item-qty");
-        const priceInput = row.querySelector(".item-price");
-
-        const qty = parseFloat(qtyInput?.value || 0);
-        const price = parseFloat(priceInput?.value || 0);
-
-        // تجاهل الصف الأخير إذا كان غير مكتمل
-        if (!itemSelect || itemSelect.value === "" || qty === 0 || price === 0) {
-            console.log(`Skipping row ${row.rowIndex + 1}: Incomplete data`);
-            continue;
-        }
-
-        // التحقق من الكمية والسعر
-        if (isNaN(qty) || qty <= 0) {
-            displayMessage(`الكمية في الصف ${row.rowIndex + 1} غير صالحة. يرجى إدخال قيمة أكبر من 0.`, "error");
-            return false;
-        }
-
-        if (isNaN(price) || price <= 0) {
-            displayMessage(`السعر في الصف ${row.rowIndex + 1} غير صالح. يرجى إدخال قيمة أكبر من 0.`, "error");
-            return false;
-        }
-    }
-    return true;
-}
-
-// ***********************************************
-// وظائف حفظ الفواتير
-// ***********************************************
-async function saveInvoice() {
-    // تحديث شريط الحالة إلى "جاري الحفظ"
-    updateStatusIndicator(2); // جاري الحفظ
-
-    // التحقق من صحة الإدخالات
-    if (!validateInputs()) {
-        displayMessage("يرجى التحقق من الحقول وإعادة المحاولة.", "error");
-        updateStatusIndicator(1); // العودة إلى "قيد الإنشاء" في حال وجود خطأ
-        return; // إيقاف العملية
-    }
-
-    showLoadingSpinner(); // عرض مؤشر التحميل
-
-    try {
-        // تحديث المبلغ الإجمالي قبل الحفظ
-        updateInvoiceAmount(); // لحساب الإجمالي من الصفوف
-
-        // تجهيز بيانات الفاتورة للحفظ
-        const invoiceData = {
-            inv_id: document.getElementById("inv_id").value,
-            inv_date: new Date(document.getElementById("inv_date").value).toISOString(),
-            inv_type: "1",
-            inv_amt: parseFloat(document.getElementById("inv_amt").value).toFixed(2), // استخدام المبلغ المحسوب
-            inv_notes: document.getElementById("inv_notes").value || null,
-            inv_status: true,
-            commit: false,
-            cr_date: new Date().toISOString(),
-            cust: parseInt(document.getElementById("cust").value) || null,
-            acc: parseInt(document.getElementById("acc").value) || null
-        };
-
-        console.log("Saving Invoice:", invoiceData);
-
-        // إرسال طلب الحفظ إلى API
-        const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(invoiceData),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            console.error("API Error Response:", errorData);
-            throw new Error(`HTTP Error: ${response.status}`);
-        }
-
-        const savedInvoice = await response.json();
-        displayMessage("تم حفظ الفاتورة بنجاح!", "success");
-
-        // تحديث حالة الحفظ
-        document.getElementById("commit").checked = true;
-        document.getElementById("commit").disabled = true;
-
-        // تحديث شريط الحالة إلى "تم الحفظ"
-        updateStatusIndicator(3);
-
-        // حفظ تفاصيل الفاتورة
-        await saveInvoiceDetails(savedInvoice.id);
-    } catch (error) {
-        console.error("Error saving invoice:", error.message, error);
-        displayMessage("حدث خطأ أثناء حفظ الفاتورة. يرجى التحقق من البيانات.", "error");
-
-        // العودة إلى "قيد الإنشاء" في حال حدوث خطأ
-        updateStatusIndicator(1);
-    } finally {
-        hideLoadingSpinner(); // إخفاء مؤشر التحميل
-    }
-}
-async function saveInvoiceDetails(invoiceId) {
-    const tableRows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-
-    for (const row of tableRows) {
-        const itemSelect = row.querySelector(".item-select");
-        const qty = parseFloat(row.querySelector(".item-qty").value);
-        const price = parseFloat(row.querySelector(".item-price").value);
-
-        // التحقق من صحة البيانات
-        if (!itemSelect || !itemSelect.value || isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) {
-            console.warn(`Skipping invalid row: ${row.rowIndex + 1}`);
-            continue; // تخطي الصفوف الفارغة أو غير الصالحة
-        }
-
-        const detail = {
-            inv_dtl_id: row.rowIndex + 1, // معرف فريد لكل صف
-            item_qty: qty.toFixed(2), // الكمية
-            item_price: price.toFixed(2), // السعر
-            inv_tax: "15.00", // نسبة الضريبة
-            tax_amt: (qty * price * 0.15).toFixed(2), // قيمة الضريبة
-            inv_status: true, // حالة الفاتورة
-            cr_date: new Date().toISOString(), // تاريخ الإنشاء
-            inv: invoiceId, // رقم الفاتورة
-            item: parseInt(itemSelect.value), // معرف الصنف
-        };
-
-        console.log("Detail prepared for API:", detail);
-
-        try {
-            // إرسال كل صف كطلب منفصل
-            const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice_dtl', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(detail),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("API Error Response:", errorData);
-                throw new Error(`Failed to create invoice detail for row ${row.rowIndex + 1}. Status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            console.log(`Row ${row.rowIndex + 1} saved successfully:`, result);
-        } catch (error) {
-            console.error(`Error saving row ${row.rowIndex + 1}:`, error.message, error);
-            displayMessage(`حدث خطأ أثناء حفظ الصف ${row.rowIndex + 1}. يرجى التحقق من البيانات.`, "error");
-        }
-    }
-
-    displayMessage("تم حفظ تفاصيل الفاتورة بنجاح!", "success");
-}
-
-// ***********************************************
-// وظائف حذف الفواتير
-// ***********************************************
-async function deleteInvoice() {
-    const invoiceId = document.getElementById("id").value;
-
-    // نافذة التأكيد
-    const confirmation = confirm("هل أنت متأكد أنك تريد حذف هذه الفاتورة؟ لن تتمكن من استعادتها لاحقًا.");
-    if (!confirmation) {
-        return; // إيقاف العملية إذا اختار المستخدم "إلغاء"
-    }
-
-    try {
-        const detailsResponse = await fetch(`http://84.46.240.24:8000/api/invoices_dtl_list`);
-        if (!detailsResponse.ok) throw new Error(`HTTP Error: ${detailsResponse.status}`);
-        const details = await detailsResponse.json();
-
-        const detailsToDelete = details.filter(detail => detail.inv == invoiceId);
-
-        for (const detail of detailsToDelete) {
-            const deleteDetailResponse = await fetch(`http://84.46.240.24:8000/api/api_delete_invoice_dtl/${detail.id}`, {
-                method: 'DELETE',
-            });
-
-            if (!deleteDetailResponse.ok) {
-                const errorDetail = await deleteDetailResponse.json();
-                console.error(`Error deleting detail ID ${detail.id}:`, errorDetail);
-                throw new Error(`HTTP Error when deleting detail ID ${detail.id}: ${deleteDetailResponse.status}`);
-            }
-
-            console.log(`Invoice detail ID ${detail.id} deleted successfully.`);
-        }
-
-        const deleteInvoiceResponse = await fetch(`http://84.46.240.24:8000/api/api_delete_invoice/${invoiceId}`, {
-            method: 'DELETE',
-        });
-
-        if (!deleteInvoiceResponse.ok) {
-            const errorInvoice = await deleteInvoiceResponse.json();
-            console.error("Error deleting invoice:", errorInvoice);
-            throw new Error(`HTTP Error when deleting invoice: ${deleteInvoiceResponse.status}`);
-        }
-
-        displayMessage("تم حذف الفاتورة وجميع التفاصيل المرتبطة بها بنجاح.", "success");
-        addNewInvoice();
-    } catch (error) {
-        console.error("Error deleting invoice and details:", error.message, error);
-        displayMessage("حدث خطأ أثناء حذف الفاتورة أو التفاصيل المرتبطة بها.", "error");
-    }
-}
-
-
-function displayMessage(message, type) {
-    const messageContainer = document.getElementById("message-container");
-
-    // تحديد نوع الرسالة (نجاح أو خطأ)
-    messageContainer.textContent = message;
-    messageContainer.className = `message ${type}`;
-    messageContainer.style.display = "block";
-
-    // إخفاء الرسالة بعد 5 ثوانٍ
-    setTimeout(() => {
-        messageContainer.style.display = "none";
-    }, 5000);
-}
-
-// ***********************************************
-// وظائف التنقل بين الفواتير
-function navigateToInvoice(direction) {
-    if (invoices.length === 0) {
-        displayMessage("لا توجد فواتير متاحة.", "error");
-        return;
-    }
-
-    console.log(`التنقل إلى الفاتورة: ${direction}`);
-    console.log(`الفهرس الحالي: ${currentInvoiceIndex}`);
-
-    switch (direction) {
-        case 'first':
-            currentInvoiceIndex = 0;
-            break;
-        case 'last':
-            currentInvoiceIndex = invoices.length - 1;
-            break;
-        case 'prev':
-            if (currentInvoiceIndex > 0) {
-                currentInvoiceIndex--;
-            } else {
-                displayMessage("أنت بالفعل في أول فاتورة.", "info");
-                return;
-            }
-            break;
-        case 'next':
-            if (currentInvoiceIndex < invoices.length - 1) {
-                currentInvoiceIndex++;
-            } else {
-                displayMessage("أنت بالفعل في آخر فاتورة.", "info");
-                return;
-            }
-            break;
-        default:
-            displayMessage("اتجاه غير معروف.", "error");
-            return;
-    }
-
-    loadInvoice(currentInvoiceIndex);
-}
-
-function loadInvoice(index) {
-    if (index < 0 || index >= invoices.length) {
-        displayMessage("الفاتورة غير موجودة.", "error");
-        return;
-    }
-
-    const invoice = invoices[index];
-    console.log(`تحميل الفاتورة ذات الفهرس ${index}:`, invoice);
-
-    // تعبئة الحقول بناءً على بيانات الفاتورة
-    document.getElementById("id").value = invoice.id || "";
-    document.getElementById("inv_id").value = invoice.inv_id || "";
-    document.getElementById("inv_date").value = new Date(invoice.inv_date).toISOString().slice(0, 16) || "";
-    document.getElementById("inv_type").value = invoice.inv_type || "";
-    document.getElementById("inv_amt").value = invoice.inv_amt || "0.00";
-    document.getElementById("inv_notes").value = invoice.inv_notes || "";
-    document.getElementById("commit").checked = invoice.commit || false;
-    document.getElementById("cust").value = invoice.cust || "";
-    document.getElementById("acc").value = invoice.acc || "";
-
-    // جلب وعرض تفاصيل الفاتورة
-    fetchInvoiceDetails(invoice.id);
-}
-
-async function fetchInvoiceDetails(invoiceId) {
-    try {
-        const response = await fetch('http://84.46.240.24:8000/api/invoices_dtl_list');
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-        const details = await response.json();
-
-        // تصفية التفاصيل بناءً على رقم الفاتورة
-        const invoiceDetails = details.filter(detail => detail.inv == invoiceId);
-        if (invoiceDetails.length === 0) {
-            console.warn(`لا توجد تفاصيل للفاتورة رقم ${invoiceId}.`);
-            clearInvoiceDetails(); // مسح التفاصيل إذا لم تكن هناك بيانات
-            return;
-        }
-
-        displayInvoiceDetails(invoiceDetails); // عرض التفاصيل
-    } catch (error) {
-        console.error("Error fetching invoice details:", error);
-    }
-}
-
-function displayInvoiceDetails(details) {
-    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    tableBody.innerHTML = ""; // مسح الصفوف القديمة
-
-    details.forEach((detail, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${getItemName(detail.item)}</td>
-            <td>${detail.item_qty}</td>
-            <td>${detail.item_price}</td>
-            <td>${detail.inv_tax}%</td>
-            <td>${detail.tax_amt}</td>
-            <td>${(parseFloat(detail.item_qty) * parseFloat(detail.item_price) + parseFloat(detail.tax_amt)).toFixed(2)}</td>
-            <td>
-                <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)">حذف</button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-
-    // تحديث الإجماليات
-    updateTotals();
-}
-
-function clearInvoiceDetails() {
-    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    tableBody.innerHTML = ""; // مسح كل الصفوف
-}
-
-// جلب اسم الصنف
-function getItemName(itemId) {
-    const item = items.find(i => i.id == itemId);
-    if (!item) {
-        console.warn(`الصنف غير موجود (ID: ${itemId})`);
-    }
-    return item ? item.item_name : "غير معروف";
-}
-
-// ***********************************************
-// وظائف العرض والتفاعل
-// ***********************************************
-function displayMessage(message, type) {
-    const messageContainer = document.getElementById("message-container");
-    messageContainer.textContent = message;
-    messageContainer.className = `message ${type}`;
-    messageContainer.style.display = "block";
-
-    setTimeout(() => {
-        messageContainer.style.display = "none";
-    }, 3000);
-}
-
-// تحميل البيانات عند تحميل الصفحة
-document.addEventListener("DOMContentLoaded", async () => {
-    await fetchItems(); // جلب بيانات الأصناف
-    await populateSelect('http://84.46.240.24:8000/api/customers_list', 'cust', 'id', 'cust_name');
-    await populateSelect('http://84.46.240.24:8000/api/accounts_list', 'acc', 'id', 'acc_name');
-    await fetchInvoices(); // جلب الفواتير
-    await setInvoiceNumber();
-
-    document.getElementById("cust").addEventListener("change", event => {
-        setAccountForCustomer(event.target.value);
-    });
-
-    ensureLastRowExists(); // إضافة صف جديد تلقائيًا
-});
-
-</script>
+<script src="invoice.js"></script>
 </body>
 </html>

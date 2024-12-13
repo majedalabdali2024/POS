@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     body {
+      overflow: hidden;
       background-color: #f8f9fa;
       color: #333;
       font-family: 'jannalt', sans-serif;
@@ -144,15 +145,26 @@
     }
 
     .iframe-container {
-      margin-top: 50px;
-      margin-right: 250px;
-      height: calc(100vh - 50px);
-      transition: margin-right 0.5s;
+    margin-top: 50px;
+    height: calc(100vh - 50px);
+    transition: margin-right 0.5s, margin-left 0.5s;
+    }
+
+    .iframe-container.rtl {
+        margin-right: 250px;
+        margin-left: 0;
+    }
+
+    .iframe-container.ltr {
+        margin-left: 250px;
+        margin-right: 0;
     }
 
     .iframe-container.expanded {
-      margin-right: 0;
+        margin-right: 0;
+        margin-left: 0;
     }
+
 
     iframe {
       width: 100%;
@@ -184,11 +196,72 @@
       height: 40px;
     }
 
+    .language-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .language-switch label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      background-color: #495057;
+      border-radius: 20px;
+      padding: 5px 10px;
+      transition: background-color 0.3s;
+    }
+
+    .language-switch input {
+      display: none;
+    }
+
+    .language-switch .slider {
+      position: relative;
+      width: 40px;
+      height: 20px;
+      background-color: #fff;
+      border-radius: 20px;
+      transition: background-color 0.3s;
+    }
+
+    .language-switch input:checked + .slider {
+      background-color: #007bff;
+    }
+
+    .language-switch .slider::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: #343a40;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .language-switch input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+
   </style>
 </head>
 <body class="light">
   <div id="overlay" class="overlay" onclick="toggleNav()"></div>
   <div id="top-nav" class="top-nav">
+    <div class="language-switch">
+      <label>
+        <input type="checkbox" id="languageToggle">
+        <div class="slider"></div>
+      </label>
+      <span id="languageLabel">عربي</span>
+    </div>
+    <button class="btnfl" id="fullscreen-btn" onclick="toggleFullScreen()">
+      <i class="fas fa-expand"></i>
+    </button>
+    <!-- <button class='btnfl btn-secondary me-2' id='fullscreen-btn' onclick='toggleFullScreen()'><i class='bi bi-arrows-fullscreen'></i></button> -->
     <!-- <button class="toggle-btn" onclick="toggleNav()">&#9776;</button>
     <span id="site-title">نظام إمداد لنقاط البيع</span> -->
   </div>
@@ -256,10 +329,116 @@
       });
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
+
+    document.addEventListener("DOMContentLoaded", function () {
       const sidenav = document.getElementById('mySidenav');
       sidenav.classList.remove('closed');
+      const languageToggle = document.getElementById("languageToggle");
+      const languageLabel = document.getElementById("languageLabel");
+      const toggleButton = document.querySelector('.sidenav-header .toggle-btn');
+      const sidenavLinks = document.querySelectorAll('.sidenav a, .dropdown-btn');
+
+      // النصوص المترجمة
+      const translations = {
+        ar: {
+          language: "عربي",
+          toggleButton: "&#9776;",
+          dashboard: "لوحة المعلومات",
+          basicData: "البيانات الأساسية",
+          accounts: "دليل الحسابات",
+          currencies: "العملات",
+          items: "الأصناف",
+          units: "الوحدات",
+          categories: "المجموعات",
+          customers: "العملاء",
+          forms: "النماذج",
+          saleInvoice: "فاتورة بيع",
+          pos: "نقاط البيع",
+          settings: "الإعدادات"
+        },
+        en: {
+          language: "English",
+          toggleButton: "&#9776;",
+          dashboard: "Dashboard",
+          basicData: "Basic Data",
+          accounts: "Chart of Accounts",
+          currencies: "Currencies",
+          items: "Items",
+          units: "Units",
+          categories: "Categories",
+          customers: "Customers",
+          forms: "Forms",
+          saleInvoice: "Sale Invoice",
+          pos: "POS",
+          settings: "Settings"
+        }
+      };
+
+      // استعادة اللغة المحفوظة
+      const savedLanguage = localStorage.getItem("language") || "ar";
+      setLanguage(savedLanguage);
+
+      // تحديث اللغة عند التغيير
+      languageToggle.addEventListener("change", function () {
+        const selectedLanguage = languageToggle.checked ? "en" : "ar";
+        setLanguage(selectedLanguage);
+        localStorage.setItem("language", selectedLanguage);
+      });
+
+      function setLanguage(lang) {
+          // تحديث الاتجاه واللغة
+          document.documentElement.setAttribute("lang", lang);
+          document.documentElement.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+
+          // تحديث النصوص
+          languageLabel.textContent = translations[lang].language;
+          toggleButton.innerHTML = translations[lang].toggleButton;
+
+          sidenavLinks.forEach((link, index) => {
+              if (index === 0) link.innerHTML = `<i class="fas fa-chart-bar icon"></i> ${translations[lang].dashboard}`;
+              if (index === 1) link.innerHTML = `<i class="fa fa-caret-down"></i> <i class="fas fa-chalkboard"></i> ${translations[lang].basicData}`;
+              if (index === 2) link.innerHTML = `<i class="fas fa-dollar icon"></i> ${translations[lang].accounts}`;
+              if (index === 3) link.innerHTML = `<i class="fas fa-dollar icon"></i> ${translations[lang].currencies}`;
+              if (index === 4) link.innerHTML = `<i class="fas fa-box icon"></i> ${translations[lang].items}`;
+              if (index === 5) link.innerHTML = `<i class="fas fa-box icon"></i> ${translations[lang].units}`;
+              if (index === 6) link.innerHTML = `<i class="fas fa-layer-group icon"></i> ${translations[lang].categories}`;
+              if (index === 7) link.innerHTML = `<i class="fas fa-users icon"></i> ${translations[lang].customers}`;
+              if (index === 8) link.innerHTML = `<i class="fa fa-caret-down"></i><i class="fas fa-folder-open"></i> ${translations[lang].forms}`;
+              if (index === 9) link.innerHTML = `<i class="fas fa-store icon"></i> ${translations[lang].saleInvoice}`;
+              if (index === 10) link.innerHTML = `<i class="fas fa-store icon"></i> ${translations[lang].pos}`;
+              if (index === 11) link.innerHTML = `<i class="fas fa-sliders-h icon"></i> ${translations[lang].settings}`;
+          });
+
+          // تحديث موضع الـ sidenav
+          sidenav.style.right = lang === "ar" ? "0" : "unset";
+          sidenav.style.left = lang === "en" ? "0" : "unset";
+          toggleButton.style.right = lang === "ar" ? "200px" : "unset";
+          toggleButton.style.left = lang === "en" ? "200px" : "unset";
+
+          // تحديث مرونة الـ iframe
+          const iframeContainer = document.getElementById("iframeContainer");
+          if (lang === "ar") {
+              iframeContainer.classList.add("rtl");
+              iframeContainer.classList.remove("ltr");
+          } else {
+              iframeContainer.classList.add("ltr");
+              iframeContainer.classList.remove("rtl");
+          }
+      }
+
+      // تحديث مرونة iframe عند فتح وإغلاق القائمة الجانبية
+      function toggleNav() {
+      const sidenav = document.getElementById('mySidenav');
+      const topnav = document.getElementById('top-nav');
+      const iframeContainer = document.getElementById('iframeContainer');
+
+      sidenav.classList.toggle('closed');
+      iframeContainer.classList.toggle('expanded');
+      topnav.classList.toggle('closed');
+  }
+
     });
   </script>
+  <script src="pos_script.js"></script>
 </body>
 </html>
