@@ -174,23 +174,31 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
             }
         }
 
-
-
-    async function setInvoiceNumber() {
-    try {
-        const data = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-        const maxId = data.reduce((max, inv) => Math.max(max, inv.id || 0), 0); // الحصول على الرقم التسلسلي
-        const maxInvoiceId = data.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0); // الحصول على رقم الفاتورة
+        async function setInvoiceNumber() {
+            try {
+                const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+                if (!invoices || invoices.length === 0) {
+                    document.getElementById("id").value = 1;
+                    document.getElementById("inv_id").value = 1;
+                    return;
+                }
         
-        document.getElementById("id").value = maxId + 1; // تعيين الرقم التسلسلي
-        document.getElementById("inv_id").value = maxInvoiceId + 1; // تعيين رقم الفاتورة
-    } catch (error) {
-        console.error("Error setting invoice number:", error);
-        document.getElementById("id").value = 1; // الرقم التسلسلي الافتراضي
-        document.getElementById("inv_id").value = 1; // رقم الفاتورة الافتراضي
-    }
-    }
-   
+                // ترتيب الفواتير حسب `inv_id`
+                invoices.sort((a, b) => a.inv_id - b.inv_id);
+        
+                // تعيين القيم الجديدة
+                const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
+                const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
+        
+                document.getElementById("id").value = maxId + 1; // الرقم التسلسلي
+                document.getElementById("inv_id").value = maxInvoiceId + 1; // رقم الفاتورة
+            } catch (error) {
+                console.error("Error setting invoice number:", error);
+                document.getElementById("id").value = 1; // القيم الافتراضية
+                document.getElementById("inv_id").value = 1; 
+            }
+        }
+        
     // جلب الحساب المرتبط بالعميل
     async function setAccountForCustomer(customerId) {
     try {
@@ -242,64 +250,87 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
 // ***********************************************
 
 async function initializeInvoice() {
-    // تصفير الحقول
     resetInvoiceForm();
 
-    // تعيين التاريخ والوقت الحالي
-    const currentDate = new Date().toISOString().slice(0, 16); // تنسيق yyyy-MM-ddTHH:mm
+    const currentDate = new Date().toISOString().slice(0, 16);
     document.getElementById("inv_date").value = currentDate;
 
-    // تعيين نوع الفاتورة الافتراضي
-    const invType = document.getElementById("inv_type").value || "1";
-    document.getElementById("invoice-type-text").textContent = getInvoiceTypeText(invType);
-
-    // تحديث الترقيم الخاص بالفاتورة
     try {
         const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
         const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
         const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
 
-        document.getElementById("id").value = maxId + 1; // تعيين الرقم التسلسلي الجديد
-        document.getElementById("inv_id").value = maxInvoiceId + 1; // تعيين رقم الفاتورة الجديد
+        document.getElementById("id").value = maxId + 1; // الرقم التسلسلي
+        document.getElementById("inv_id").value = maxInvoiceId + 1; // رقم الفاتورة
     } catch (error) {
         console.error("Error setting invoice number:", error);
-        document.getElementById("id").value = 1; // الرقم التسلسلي الافتراضي
-        document.getElementById("inv_id").value = 1; // رقم الفاتورة الافتراضي
+        document.getElementById("id").value = 1;
+        document.getElementById("inv_id").value = 1; 
     }
 
-    // تصفير جدول التفاصيل
     clearInvoiceDetails();
-
-    // إضافة صف جديد فارغ
     ensureLastRowExists();
+    updateStatusIndicator(1); // تحديث الحالة
+}
 
-    // تحديث حالة الفاتورة إلى "قيد الإنشاء"
-    updateStatusIndicator(1);
+async function getNextInvoiceNumber() {
+    try {
+        const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+        if (!invoices || invoices.length === 0) {
+            return 1; // إذا لم تكن هناك فواتير، يبدأ الرقم من 1
+        }
 
-    console.log("Invoice initialized successfully.");
+        // حساب أعلى رقم فاتورة
+        const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
+        return maxInvoiceId + 1; // الرقم التالي
+    } catch (error) {
+        console.error("Error fetching next invoice number:", error);
+        return 1; // القيمة الافتراضية عند حدوث خطأ
+    }
 }
 
 async function addNewInvoice() {
-    await initializeInvoice(); // استدعاء الدالة المشتركة
-    document.getElementById("invoice-type-text").textContent = getInvoiceTypeText("1"); // افتراضيًا "شراء"
-    displayMessage("تم إنشاء فاتورة جديدة.", "success");
+    try {
+        // إعادة تعيين الحقول
+        resetInvoiceForm();
+
+        // تعيين التاريخ الحالي
+        const currentDate = new Date().toISOString().slice(0, 16);
+        document.getElementById("inv_date").value = currentDate;
+
+        // جلب الرقم الجديد وتعيينه
+        const nextInvoiceNumber = await getNextInvoiceNumber();
+        document.getElementById("inv_id").value = nextInvoiceNumber;
+        document.getElementById("invoice-type-text").textContent = getInvoiceTypeText("2");
+        document.getElementById("invoice-number").textContent = nextInvoiceNumber;
+
+        // إعادة الحالة إلى قيد الإنشاء
+        updateStatusIndicator(1);
+
+        // إظهار رسالة النجاح
+        displayMessage(`تم إنشاء فاتورة جديدة برقم ${nextInvoiceNumber}.`, "success");
+
+        // التأكد من أن التفاصيل مهيأة
+        ensureLastRowExists();
+
+    } catch (error) {
+        console.error("Error adding new invoice:", error);
+        displayMessage("حدث خطأ أثناء إنشاء فاتورة جديدة.", "error");
+    }
 }
 
 
-
-// وظيفة تصفير الحقول وجعل الصفحة جاهزة للإدخال
+// تصفير الحقول وجعل الصفحة جاهزة للإدخال
 function resetInvoiceForm() {
-    document.getElementById("id").value = ""; // رقم تسلسلي فارغ
-    document.getElementById("inv_id").value = ""; // رقم فاتورة فارغ
-    document.getElementById("inv_date").value = ""; // تاريخ فارغ
-    document.getElementById("inv_type").value = "1"; // نوع الفاتورة الافتراضي
-    document.getElementById("inv_amt").value = "0.00"; // المبلغ الافتراضي
-    document.getElementById("inv_notes").value = ""; // ملاحظات فارغة
-    document.getElementById("commit").checked = false; // حالة الحفظ
-    document.getElementById("cust").value = ""; // العميل الافتراضي
-    document.getElementById("acc").value = ""; // الحساب الافتراضي
+    document.getElementById("id").value = ""; 
+    document.getElementById("inv_id").value = ""; 
+    document.getElementById("inv_date").value = new Date().toISOString().slice(0, 16);
+    document.getElementById("inv_type").value = "2"; 
+    document.getElementById("inv_amt").value = "0.00"; 
+    document.getElementById("inv_notes").value = "";
+    document.getElementById("cust").value = "";
+    document.getElementById("acc").value = ""; 
 
-    // مسح تفاصيل الفاتورة
     clearInvoiceDetails();
 }
 
@@ -317,7 +348,6 @@ function addDetailRow() {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
     const row = document.createElement("tr");
 
-    // تعيين معرفات الحقول ديناميكيًا بناءً على عدد الصفوف
     const rowIndex = tableBody.rows.length + 1;
     const itemDatalistId = `items-datalist-${rowIndex}`;
     const itemInputId = `item-input-${rowIndex}`;
@@ -342,7 +372,6 @@ function addDetailRow() {
 
     tableBody.appendChild(row);
 
-    // تحديث الأحداث
     enableRowAutoAdd();
     enableCellHighlight();
     validateItemInput();
@@ -354,11 +383,9 @@ function editDetailRow(button) {
     const qtyInput = row.querySelector(".item-qty");
     const priceInput = row.querySelector(".item-price");
 
-    // السماح بتعديل القيم
     qtyInput.disabled = false;
     priceInput.disabled = false;
 
-    // تغيير الزر إلى "حفظ"
     button.textContent = "حفظ";
     button.className = "btn btn-success btn-sm";
     button.onclick = function () {
@@ -370,18 +397,15 @@ function saveDetailRow(row, button) {
     const qtyInput = row.querySelector(".item-qty");
     const priceInput = row.querySelector(".item-price");
 
-    // منع التعديل
     qtyInput.disabled = true;
     priceInput.disabled = true;
 
-    // إعادة الزر إلى "تعديل"
     button.textContent = "تعديل";
     button.className = "btn btn-primary btn-sm";
     button.onclick = function () {
         editDetailRow(button);
     };
 
-    // تحديث الإجماليات
     updateTotals();
 }
 
@@ -393,7 +417,7 @@ function createItemSelect() {
     select.innerHTML = '<option value="">اختر الصنف...</option>' + 
         items.map(item => `<option value="${item.id}">${item.item_name}</option>`).join('');
 
-    select.addEventListener("change", ensureLastRowExists); // إضافة صف جديد عند تغيير القيمة
+    select.addEventListener("change", ensureLastRowExists); 
     return select;
 }
 
@@ -413,7 +437,6 @@ function enableRowAutoAdd() {
     tableBody.addEventListener("input", (event) => {
         const targetRow = event.target.closest("tr");
 
-        // تحقق من إجماليات الصف
         updateRowTotals(targetRow);
 
         // تحقق إذا كان الصف الأخير ممتلئًا، وإذا كان ممتلئًا أضف صفًا جديدًا
@@ -421,8 +444,6 @@ function enableRowAutoAdd() {
         if (isRowFilled(rows[rows.length - 1])) {
             addDetailRow();
         }
-
-        // تحديث الإجماليات الكلية
         updateTotals();
     });
 }
@@ -443,15 +464,13 @@ function updateRowTotals(row) {
         return;
     }
 
-    const tax = qty * price * 0.15; // حساب الضريبة بنسبة 15%
-    const total = qty * price + tax; // الإجمالي
+    const tax = qty * price * 0.15; 
+    const total = qty * price + tax; 
 
-    // تحديث القيم في الجدول
     taxCell.textContent = tax.toFixed(2);
     totalCell.textContent = total.toFixed(2);
 }
 
-// تفعيل الدالة عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", () => {
     enableRowAutoAdd();
 });
@@ -551,7 +570,6 @@ function validateInputs() {
 async function saveInvoice() {
     updateStatusIndicator(2);
 
-    // التحقق من صحة الإدخال
     validateAndSetCustomer();
     const customerId = document.getElementById("cust").dataset.id;
 
@@ -564,25 +582,28 @@ async function saveInvoice() {
     showLoadingSpinner();
 
     try {
-        updateInvoiceAmount(); // حساب الإجمالي
+        // تحديث إجمالي الفاتورة
+        updateInvoiceAmount();
 
+        // إعداد بيانات الفاتورة
         const invoiceData = {
             inv_id: document.getElementById("inv_id").value,
             inv_date: new Date(document.getElementById("inv_date").value).toISOString(),
             inv_type: "1",
-            inv_amt: parseFloat(document.getElementById("inv_amt").value).toFixed(2), // إجمالي الفاتورة
-            inv_tax: parseFloat(document.getElementById("total-tax").textContent).toFixed(2), // إجمالي الضريبة
-            inv_net: parseFloat(document.getElementById("total-after-tax").textContent).toFixed(2), // الصافي بعد الضريبة
+            inv_amt: parseFloat(document.getElementById("inv_amt").value).toFixed(2),
+            inv_tax: parseFloat(document.getElementById("total-tax").textContent).toFixed(2),
+            inv_net: parseFloat(document.getElementById("total-after-tax").textContent).toFixed(2),
             inv_notes: document.getElementById("inv_notes").value || null,
             inv_status: true,
-            commit: false, // سيتم تحديثه بعد نجاح الحفظ
+            commit: false,
             cr_date: new Date().toISOString(),
-            cust: parseInt(customerId), // استخدام معرف العميل
+            cust: parseInt(customerId),
             acc: parseInt(document.getElementById("acc").value) || null
         };
 
         console.log("Saving Invoice:", invoiceData);
 
+        // إرسال الطلب إلى API
         const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -600,9 +621,17 @@ async function saveInvoice() {
         displayMessage("تم حفظ الفاتورة بنجاح!", "success");
         updateStatusIndicator(3);
 
-        // حفظ تفاصيل الفاتورة بعد حفظ الفاتورة الرئيسية
+        // حفظ تفاصيل الفاتورة
         const detailsSaved = await saveInvoiceDetails(savedInvoice.id);
         if (!detailsSaved) throw new Error("Failed to save invoice details.");
+
+        // تحديث قائمة الفواتير
+        await fetchInvoices();
+
+        // تحديث الرقم الجديد
+        const nextInvoiceNumber = await getNextInvoiceNumber();
+        document.getElementById("inv_id").value = nextInvoiceNumber;
+
     } catch (error) {
         console.error("Error saving invoice:", error.message, error);
         displayMessage("حدث خطأ أثناء حفظ الفاتورة. يرجى التحقق من البيانات.", "error");
@@ -612,9 +641,10 @@ async function saveInvoice() {
     }
 }
 
+
 async function saveInvoiceDetails(invoiceId) {
     const tableRows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
-    let allDetailsSaved = true; // متغير لتتبع نجاح الحفظ
+    let allDetailsSaved = true;
 
     for (const row of tableRows) {
         const itemInput = row.querySelector(".item-select");
@@ -625,20 +655,20 @@ async function saveInvoiceDetails(invoiceId) {
         const qty = parseFloat(qtyInput.value);
         const price = parseFloat(priceInput.value);
 
-        // العثور على الصنف بناءً على الاسم
+
         const selectedItem = items.find(item => item.item_name === itemName);
 
         if (!selectedItem || isNaN(qty) || qty <= 0 || isNaN(price) || price <= 0) {
             console.warn(`Skipping invalid row: ${row.rowIndex + 1}`);
-            continue; // قم بتخطي الصف
+            continue; 
         }
 
         const detail = {
             inv_dtl_id: row.rowIndex + 1, // معرف فريد لكل صف
-            item_qty: qty.toFixed(2), // الكمية
-            item_price: price.toFixed(2), // السعر
-            inv_tax: "15.00", // نسبة الضريبة
-            tax_amt: (qty * price * 0.15).toFixed(2), // قيمة الضريبة
+            item_qty: qty.toFixed(0), 
+            item_price: price.toFixed(2), 
+            inv_tax: "15.00",
+            tax_amt: (qty * price * 0.15).toFixed(0),
             inv_status: true, // حالة الفاتورة
             cr_date: new Date().toISOString(), // تاريخ الإنشاء
             inv: invoiceId, // رقم الفاتورة
