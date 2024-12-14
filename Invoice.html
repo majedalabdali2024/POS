@@ -6,106 +6,132 @@
     <title>تفاصيل الفاتورة</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="invoice.css">
 </head>
-<body class="container py-4">  
-    <div class="d-flex justify-content-start align-items-center mb-4">
-        <h3 class="mb-0 me-3">فاتورة</h3>
-        <h4 id="invoice-type-text" class="mb-0 me-2" style="font-weight: normal; font-size: 25px;">--</h4>
-        <div class="text-end" style="font-size: 14px;">
-            <div><strong>#</strong> <span id="invoice-number">--</span></div>
-            <div><strong></strong> <span id="invoice-date">--</span></div>
+<body class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- عنوان الفاتورة مع رقم الفاتورة والتاريخ -->
+        <div class="d-flex align-items-center">
+            <h3 class="mb-0 me-3" style="font-size: 24px;">فاتورة</h3>
+            <h4 id="inv_type" class="mb-0" style="font-weight: bold; font-size: 25px;">بيع</h4>
+            <div class="d-flex align-items-center ms-4" style="gap: 10px; font-size: 18px;">
+                <div><strong>
+                </strong>#<span id="inv_id"></span></div>
+                <div><strong></strong> <span id="invoice-date"></span></div>
+            </div>
         </div>
-    </div>      
-    <div id="status-indicator">
+    </div>        
+    <!-- حالة الفاتورة -->
+    <div id="status-indicator" class="d-flex justify-content-between align-items-center mb-4">
         <div class="step" id="step-1">
-            <div class="circle">1</div>
+            <div class="circle">
+                <i class="fas fa-pencil-alt"></i>
+            </div>
             <span>قيد الإنشاء</span>
-            <div class="line"></div>
         </div>
+        <div class="line"></div>
         <div class="step" id="step-2">
-            <div class="circle">2</div>
+            <div class="circle">
+                <i class="fas fa-save"></i>
+            </div>
             <span>جاري الحفظ</span>
-            <div class="line"></div>
         </div>
+        <div class="line"></div>
         <div class="step" id="step-3">
-            <div class="circle">3</div>
+            <div class="circle">
+                <i class="fas fa-check-circle"></i>
+            </div>
             <span>تم الحفظ</span>
         </div>
-    </div>    
-<div class="invoice-controls d-flex gap-2">
-    <div class="col-md-3">
-        <input class="form-control" id="search-invoice" list="invoice-list" placeholder="اختر رقم الفاتورة...">
-        <datalist id="invoice-list"></datalist>
-    </div>   
-    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('last')" title="آخر فاتورة">
-        <i class="bi bi-skip-forward-fill"></i>
-    </button>
-    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('next')" title="الفاتورة التالية">
-        <i class="bi bi-chevron-right"></i>
-    </button>
-    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('prev')" title="الفاتورة السابقة">
-        <i class="bi bi-chevron-left"></i>
-    </button>
-    <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('first')" title="أول فاتورة">
-        <i class="bi bi-skip-backward-fill"></i>
-    </button>
-    <button id="save-btn" class="btn btn-success shadow-sm" onclick="saveInvoice()" title="حفظ">
-        <i class="bi bi-save-fill"></i>
-    </button>
-    <button id="new-invoice-btn" class="btn btn-primary shadow-sm" onclick="addNewInvoice()" title="فاتورة جديدة">
-        <i class="bi bi-file-earmark-plus-fill"></i>
-    </button>
-    <button id="delete-invoice-btn" class="btn btn-danger shadow-sm" onclick="deleteInvoice()" title="حذف الفاتورة">
-        <i class="bi bi-trash-fill"></i>
-    </button>
-</div>
-
-<div id="invoice-details" class="mb-4">
-    <div class="row">
-        <div class="col-md-3" hidden>
-            <label for="id" class="form-label">رقم تسلسلي:</label>
-            <input type="text" id="id" class="form-control" readonly>
-        </div>
-        <div class="col-md-3" hidden>
-            <label for="inv_id" class="form-label">رقم الفاتورة:</label>
-            <input type="text" id="inv_id" class="form-control" readonly>
-        </div>
-        <div class="col-md-3" hidden>
-            <label for="inv_type" class="form-label">نوع الفاتورة:</label>
-            <input type="text" id="inv_type" class="form-control" value="1" readonly>
-        </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-md-3" hidden>
-            <label for="inv_amt" class="form-label">المبلغ:</label>
-            <input type="text" id="inv_amt" class="form-control" value="0" readonly>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-3">
-                <label for="cust" class="form-label">العميل:</label>
-                <input class="form-control" id="cust" list="custlist" placeholder="اختر أو اكتب اسم العميل..." autocomplete="off">
-                <datalist id="custlist">
 
-                </datalist>                
+    <!-- أزرار التحكم -->
+    <div class="invoice-controls d-flex gap-2 mb-4">
+        <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('last')" title="آخر فاتورة">
+            <i class="bi bi-skip-forward-fill"></i>
+        </button>
+        <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('next')" title="الفاتورة التالية">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+        <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('prev')" title="الفاتورة السابقة">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <button class="btn btn-light shadow-sm" onclick="navigateToInvoice('first')" title="أول فاتورة">
+            <i class="bi bi-skip-backward-fill"></i>
+        </button>
+        <button id="save-btn" class="btn btn-success shadow-sm" onclick="saveInvoice()" title="حفظ">
+            <i class="bi bi-save-fill"></i>
+        </button>
+        <button id="new-invoice-btn" class="btn btn-primary shadow-sm" onclick="addNewInvoice()" title="فاتورة جديدة">
+            <i class="bi bi-file-earmark-plus-fill"></i>
+        </button>
+        <button id="delete-invoice-btn" class="btn btn-danger shadow-sm" onclick="deleteInvoice()" title="حذف الفاتورة">
+            <i class="bi bi-trash-fill"></i>
+        </button>
+    </div>
+
+    <!-- تفاصيل الفاتورة -->
+    <div id="invoice-details" class="mb-4">
+        <div class="row">
+            <!-- المكونات المخفية -->
+            <div class="col-md-3" hidden>
+                <label for="id" class="form-label">رقم تسلسلي:</label>
+                <input type="text" id="id" class="form-control" readonly>
             </div>
-            <div class="col-md-3" >
-                <label for="inv_date" class="form-label">تاريخ الفاتورة:</label>
-                <input type="datetime-local" id="inv_date" class="form-control" />
+            <div class="col-md-3" hidden>
+                <label for="inv_type" class="form-label">نوع الفاتورة:</label>
+                <input type="text" id="inv_type" class="form-control" value="1" readonly>
             </div>
-            <div class="col-md-6" >
-                <label for="inv_notes" class="form-label">ملاحظات:</label>
+            <div class="col-md-3" hidden>
+                <label for="inv_amt" class="form-label">المبلغ:</label>
+                <input type="text" id="inv_amt" class="form-control" value="0" readonly>
+            </div>
+        </div>
+        <div id="invoice-details" class="mb-3">
+            <div class="row align-items-center">
+                <!-- خانة العميل -->
+                <div class="col-md-4">
+                    <label for="cust">العميل:</label>
+                    <input class="form-control" id="cust" list="custlist" placeholder="اختر أو اكتب اسم العميل...">
+                    <datalist id="custlist"></datalist>
+                    <small id="customer-info" class="text-muted"></small>
+                </div>
+
+                <!-- QR Code -->
+                <div class="col-md-4 text-center">
+                    <canvas id="qr-code"></canvas>
+                </div>
+
+                <!-- رقم المرجع وتاريخ الفاتورة -->
+                <div class="col-md-4">
+                    <label for="ref_number">رقم المرجع:</label>
+                    <input class="form-control mb-2" id="ref_number" placeholder="أدخل رقم المرجع...">
+                    <label for="inv_date">تاريخ الفاتورة:</label>
+                    <input class="form-control" id="inv_date" type="datetime-local">
+                </div>
+            </div>
+        </div>
+
+        <!-- ملاحظات الفاتورة -->
+        <div class="row mt-3 mb-2">
+            <div class="col-md-12">
                 <input type="text" id="inv_notes" class="form-control" placeholder="إضافة ملاحظات...">
             </div>
-            <div class="col-md-6" hidden>
-                <label for="acc" class="form-label">الحساب:</label>
-                <select id="acc" class="form-select" disabled>
-                    <option value="">يرجى اختيار عميل صحيح</option>
-                </select>
-            </div>            
+        </div>
+    </div>
+
+    <!-- الحقول المخفية الأخرى -->
+    <div class="row">
+        <div class="col-md-6" hidden>
+            <label for="acc" class="form-label">الحساب:</label>
+            <select id="acc" class="form-select" disabled>
+                <option value="">يرجى اختيار عميل صحيح</option>
+            </select>
         </div>
         <div class="col-md-3" hidden>
-            <label for="commit" class="form-label"> حفظ:</label>
+            <label for="commit" class="form-label">حفظ:</label>
             <input type="checkbox" id="commit" class="form-check-input" disabled>
         </div>
         <div class="col-md-3" hidden>
@@ -113,27 +139,27 @@
             <input type="datetime-local" id="cr_date" class="form-control" readonly>
         </div>
     </div>
-</div>
 
-<div class="table-responsive mt-4">
-    <table class="table table-bordered table-sm" id="invoice-details-table">
-        <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>اسم الصنف</th>
-                <th>الكمية</th>
-                <th>السعر</th>
-                <th>نسبة الضريبة</th>
-                <th>الضريبة</th>
-                <th>الإجمالي</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- جدول الفاتورة -->
+    <div class="table-responsive mt-4">
+        <table class="table table-bordered table-sm" id="invoice-details-table">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>اسم الصنف</th>
+                    <th>الكمية</th>
+                    <th>السعر</th>
+                    <th>نسبة الضريبة</th>
+                    <th>الضريبة</th>
+                    <th>الإجمالي</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</body>
 
-        </tbody>
-    </table>
-</div>
 <div id="loading-spinner" style="display: none; text-align: center; margin-top: 20px;">
     <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">جاري التحميل...</span>
@@ -162,5 +188,6 @@
     </div>
 </footer>
 <script src="invoice.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </body>
 </html>

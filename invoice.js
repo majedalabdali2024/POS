@@ -4,7 +4,7 @@
 let items = [];
 let invoices = [];
 let currentInvoiceIndex = 0;
-const itemCache = {}; // تخزين مؤقت للأصناف
+const itemCache = {}; 
 
 function showLoadingSpinner() {
     document.getElementById("loading-spinner").style.display = "block";
@@ -27,7 +27,7 @@ async function fetchData(url, options = {}) {
         return await response.json();
     } catch (error) {
         console.error(`Error fetching data from ${url}:`, error);
-        throw error; // إعادة تمرير الخطأ ليتم التعامل معه في مكان الاستدعاء
+        throw error; 
     }
 }
 // ***********************************************
@@ -40,12 +40,10 @@ function displayMessage(message, type) {
         return;
     }
 
-    // تعيين النص والنوع
     container.textContent = message;
     container.className = `message ${type}`;
     container.style.display = "block";
 
-    // إتاحة الإغلاق اليدوي بجانب الاختفاء التلقائي
     setTimeout(() => {
         container.style.display = "none";
     }, 5000);
@@ -54,7 +52,6 @@ function displayMessage(message, type) {
 
 // ***********************************************
 
-// مثال على استخدام الدوال
 async function fetchItems() {
     try {
         items = await fetchData('http://84.46.240.24:8000/api/items_list/');
@@ -65,13 +62,11 @@ async function fetchItems() {
 }
 
 async function fetchInvoices() {
-    showLoadingSpinner(); // عرض مؤشر التحميل
+    showLoadingSpinner(); 
     try {
-        // جلب بيانات الفواتير من API
         invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
 
         if (invoices.length > 0) {
-            // ترتيب الفواتير حسب `inv_id`
             invoices.sort((a, b) => a.inv_id - b.inv_id);
             console.log("الفواتير المرتبة:", invoices);
         } else {
@@ -81,17 +76,17 @@ async function fetchInvoices() {
         console.error("خطأ أثناء جلب الفواتير:", error);
         displayMessage("حدث خطأ أثناء جلب الفواتير.", "error");
     } finally {
-        hideLoadingSpinner(); // إخفاء مؤشر التحميل
-        resetInvoiceForm(); // تصفير الحقول
+        hideLoadingSpinner(); 
+        resetInvoiceForm(); 
     }
 }
 
 // ***********************************************
-// دالة عامة لتعبئة قائمة (Select أو Datalist) ديناميكيًا
+// دالة عامة لتعبئة قائمة (Select أو Datalist) 
 // ***********************************************
 async function populateList(apiUrl, elementId, type = 'datalist', valueField = 'id', textField = 'name') {
     try {
-        const data = await fetchData(apiUrl); // جلب البيانات من API
+        const data = await fetchData(apiUrl); 
         const element = document.getElementById(elementId);
 
         if (!element) {
@@ -160,17 +155,16 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
 
             const datalistOptions = Array.from(datalist.options);
 
-            // البحث عن العميل في الخيارات
             const selectedCustomer = datalistOptions.find(option => option.value === customerName);
 
             if (selectedCustomer) {
-                // تعيين معرف العميل إذا كان الاسم صالحًا
+
                 customerInput.setAttribute("data-id", selectedCustomer.getAttribute("data-id"));
             } else {
-                // إذا لم يكن الاسم صالحًا
+
                 alert("القيمة المدخلة غير صحيحة. يرجى اختيار قيمة من القائمة.");
-                customerInput.value = ""; // إعادة تعيين الحقل
-                customerInput.removeAttribute("data-id"); // إزالة المعرف
+                customerInput.value = ""; 
+                customerInput.removeAttribute("data-id"); 
             }
         }
 
@@ -179,72 +173,83 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
                 const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
                 if (!invoices || invoices.length === 0) {
                     document.getElementById("id").value = 1;
-                    document.getElementById("inv_id").value = 1;
+                    document.getElementById("inv_id").textContent = 1;
                     return;
                 }
-        
-                // ترتيب الفواتير حسب `inv_id`
+
                 invoices.sort((a, b) => a.inv_id - b.inv_id);
-        
-                // تعيين القيم الجديدة
+
                 const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
                 const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
         
-                document.getElementById("id").value = maxId + 1; // الرقم التسلسلي
-                document.getElementById("inv_id").value = maxInvoiceId + 1; // رقم الفاتورة
+                document.getElementById("id").value = maxId + 1; 
+                document.getElementById("inv_id").textContent = maxInvoiceId + 1;
             } catch (error) {
                 console.error("Error setting invoice number:", error);
-                document.getElementById("id").value = 1; // القيم الافتراضية
-                document.getElementById("inv_id").value = 1; 
+                document.getElementById("id").value = 1; 
+                document.getElementById("inv_id").textContent = 1; 
             }
         }
         
-    // جلب الحساب المرتبط بالعميل
-    async function setAccountForCustomer(customerId) {
-    try {
-        const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
-        const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
 
-        // العثور على العميل بناءً على معرفه
-        const customer = customers.find(cust => cust.id == customerId);
-        if (customer) {
-            // العثور على الحساب المرتبط بالعميل
-            const account = accounts.find(acc => acc.id == customer.acc);
-            if (account) {
-                document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
-            } else {
-                document.getElementById("acc").innerHTML = '<option value="">لا يوجد حساب مرتبط</option>';
+        async function setCustomerDetails(customerId) {
+            try {
+                // جلب قائمة العملاء
+                const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
+                const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
+        
+                // العثور على العميل بناءً على المعرف
+                const customer = customers.find(cust => cust.id == customerId);
+        
+                if (customer) {
+                    // إعداد معلومات العميل (VAT، العنوان، ورقم الهاتف)
+                    const customerInfo = `${customer.vat_no || ''}, ${customer.address || ''}, ${customer.mobile || ''}`;
+                    document.getElementById("customer-info").textContent = customerInfo;
+        
+                    // إعداد الحساب المرتبط بالعميل
+                    const account = accounts.find(acc => acc.id == customer.acc);
+                    if (account) {
+                        document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
+                    } else {
+                        document.getElementById("acc").innerHTML = '<option value="">لا يوجد حساب مرتبط</option>';
+                    }
+                } else {
+                    // إذا لم يتم العثور على العميل
+                    document.getElementById("customer-info").textContent = "لم يتم العثور على معلومات العميل.";
+                    document.getElementById("acc").innerHTML = '<option value="">يرجى اختيار عميل صحيح</option>';
+                }
+            } catch (error) {
+                // التعامل مع الأخطاء
+                console.error("Error setting customer details:", error);
+                document.getElementById("customer-info").textContent = "حدث خطأ أثناء جلب معلومات العميل.";
+                document.getElementById("acc").innerHTML = '<option value="">حدث خطأ أثناء جلب الحساب</option>';
             }
-        } else {
-            document.getElementById("acc").innerHTML = '<option value="">يرجى اختيار عميل صحيح</option>';
         }
-    } catch (error) {
-        console.error("Error setting account for customer:", error);
-        document.getElementById("acc").innerHTML = '<option value="">حدث خطأ أثناء جلب الحساب</option>';
-    }
-}
 
-
-
-    function updateStatusIndicator(step) {
-    const steps = document.querySelectorAll('.step');
-    const lines = document.querySelectorAll('.line');
-
-    steps.forEach((stepElement, index) => {
-        stepElement.querySelector('.circle').classList.remove('active', 'completed');
-        if (index < step - 1) {
-            stepElement.querySelector('.circle').classList.add('completed');
-        } else if (index === step - 1) {
-            stepElement.querySelector('.circle').classList.add('active');
+        function updateStatusIndicator(currentStep) {
+            const steps = document.querySelectorAll('#status-indicator .step');
+            steps.forEach((step, index) => {
+                const circle = step.querySelector('.circle');
+                const line = step.querySelector('.line');
+                const text = step.querySelector('span');
+        
+                if (index < currentStep) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                    circle.classList.add('completed');
+                    text.classList.add('completed');
+                } else if (index === currentStep) {
+                    step.classList.add('active');
+                    circle.classList.add('active');
+                    text.classList.add('active');
+                } else {
+                    step.classList.remove('completed', 'active');
+                    circle.classList.remove('completed', 'active');
+                    text.classList.remove('completed', 'active');
+                }
+            });
         }
-    });
-
-    lines.forEach((line, index) => {
-        line.style.backgroundColor = index < step - 1 ? '#28a745' : '#ccc';
-    });
-}
-
-
+        
 // ***********************************************
 // وظائف إنشاء الفواتير
 // ***********************************************
@@ -260,72 +265,59 @@ async function initializeInvoice() {
         const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
         const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
 
-        document.getElementById("id").value = maxId + 1; // الرقم التسلسلي
-        document.getElementById("inv_id").value = maxInvoiceId + 1; // رقم الفاتورة
+        document.getElementById("id").value = maxId + 1;
+        document.getElementById("inv_id").textContent = maxInvoiceId + 1; 
     } catch (error) {
         console.error("Error setting invoice number:", error);
         document.getElementById("id").value = 1;
-        document.getElementById("inv_id").value = 1; 
+        document.getElementById("inv_id").textContent = 1; 
     }
 
     clearInvoiceDetails();
     ensureLastRowExists();
-    updateStatusIndicator(1); // تحديث الحالة
+    updateStatusIndicator(1); 
 }
 
 async function getNextInvoiceNumber() {
     try {
         const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
         if (!invoices || invoices.length === 0) {
-            return 1; // إذا لم تكن هناك فواتير، يبدأ الرقم من 1
+            return 1; // إذا لم توجد فواتير، يبدأ الرقم من 1
         }
 
-        // حساب أعلى رقم فاتورة
         const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
-        return maxInvoiceId + 1; // الرقم التالي
+        return maxInvoiceId + 1; // زيادة الرقم بأحد
     } catch (error) {
         console.error("Error fetching next invoice number:", error);
-        return 1; // القيمة الافتراضية عند حدوث خطأ
+        return 1; // افتراض رقم 1 في حالة وجود خطأ
     }
 }
 
 async function addNewInvoice() {
     try {
-        // إعادة تعيين الحقول
         resetInvoiceForm();
 
-        // تعيين التاريخ الحالي
         const currentDate = new Date().toISOString().slice(0, 16);
         document.getElementById("inv_date").value = currentDate;
 
-        // جلب الرقم الجديد وتعيينه
         const nextInvoiceNumber = await getNextInvoiceNumber();
-        document.getElementById("inv_id").value = nextInvoiceNumber;
-        document.getElementById("invoice-type-text").textContent = getInvoiceTypeText("2");
-        document.getElementById("invoice-number").textContent = nextInvoiceNumber;
+        document.getElementById("inv_id").textContent = nextInvoiceNumber;
 
-        // إعادة الحالة إلى قيد الإنشاء
         updateStatusIndicator(1);
-
-        // إظهار رسالة النجاح
         displayMessage(`تم إنشاء فاتورة جديدة برقم ${nextInvoiceNumber}.`, "success");
 
-        // التأكد من أن التفاصيل مهيأة
         ensureLastRowExists();
-
     } catch (error) {
         console.error("Error adding new invoice:", error);
         displayMessage("حدث خطأ أثناء إنشاء فاتورة جديدة.", "error");
     }
 }
 
-
-// تصفير الحقول وجعل الصفحة جاهزة للإدخال
 function resetInvoiceForm() {
     document.getElementById("id").value = ""; 
-    document.getElementById("inv_id").value = ""; 
+    document.getElementById("inv_id").textContent = ""; 
     document.getElementById("inv_date").value = new Date().toISOString().slice(0, 16);
-    document.getElementById("inv_type").value = "2"; 
+    document.getElementById("inv_type").textContent = getInvoiceTypeText("2"); 
     document.getElementById("inv_amt").value = "0.00"; 
     document.getElementById("inv_notes").value = "";
     document.getElementById("cust").value = "";
@@ -334,11 +326,12 @@ function resetInvoiceForm() {
     clearInvoiceDetails();
 }
 
+
+
 function ensureLastRowExists() {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
     const rows = Array.from(tableBody.rows);
 
-    // إذا لم يكن هناك صفوف أو كان الصف الأخير مكتملًا، أضف صفًا جديدًا
     if (rows.length === 0 || isRowFilled(rows[rows.length - 1])) {
         addDetailRow();
     }
@@ -366,7 +359,7 @@ function addDetailRow() {
         <td class="item-tax">0.00</td>
         <td class="item-total">0.00</td>
         <td>
-            <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)">حذف</button>
+            <button class="btn btn-danger btn-sm" onclick="removeDetailRow(this)"><i class="fas fa-trash"></i></button>
         </td>
     `;
 
@@ -413,7 +406,6 @@ function createItemSelect() {
     const select = document.createElement("select");
     select.className = "form-control item-select";
 
-    // تعبئة القائمة بأسماء الأصناف
     select.innerHTML = '<option value="">اختر الصنف...</option>' + 
         items.map(item => `<option value="${item.id}">${item.item_name}</option>`).join('');
 
@@ -439,7 +431,7 @@ function enableRowAutoAdd() {
 
         updateRowTotals(targetRow);
 
-        // تحقق إذا كان الصف الأخير ممتلئًا، وإذا كان ممتلئًا أضف صفًا جديدًا
+
         const rows = Array.from(tableBody.rows);
         if (isRowFilled(rows[rows.length - 1])) {
             addDetailRow();
@@ -582,17 +574,15 @@ async function saveInvoice() {
     showLoadingSpinner();
 
     try {
-        // تحديث إجمالي الفاتورة
         updateInvoiceAmount();
 
-        // إعداد بيانات الفاتورة
         const invoiceData = {
-            inv_id: document.getElementById("inv_id").value,
+            inv_id: document.getElementById("inv_id").textContent,
             inv_date: new Date(document.getElementById("inv_date").value).toISOString(),
-            inv_type: "1",
-            inv_amt: parseFloat(document.getElementById("inv_amt").value).toFixed(2),
+            inv_type: 2,
+            inv_amt: (parseFloat(document.getElementById("total-after-tax").textContent)).toFixed(2), // شامل الضريبة
             inv_tax: parseFloat(document.getElementById("total-tax").textContent).toFixed(2),
-            inv_net: parseFloat(document.getElementById("total-after-tax").textContent).toFixed(2),
+            inv_net: parseFloat(document.getElementById("total-amount").textContent).toFixed(2), // المبلغ قبل الضريبة
             inv_notes: document.getElementById("inv_notes").value || null,
             inv_status: true,
             commit: false,
@@ -603,7 +593,6 @@ async function saveInvoice() {
 
         console.log("Saving Invoice:", invoiceData);
 
-        // إرسال الطلب إلى API
         const response = await fetch('http://84.46.240.24:8000/api/api_create_invoice', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -621,16 +610,15 @@ async function saveInvoice() {
         displayMessage("تم حفظ الفاتورة بنجاح!", "success");
         updateStatusIndicator(3);
 
-        // حفظ تفاصيل الفاتورة
         const detailsSaved = await saveInvoiceDetails(savedInvoice.id);
         if (!detailsSaved) throw new Error("Failed to save invoice details.");
 
-        // تحديث قائمة الفواتير
-        await fetchInvoices();
+        // توليد QR Code بعد الحفظ
+        generateQRCode(invoiceData);
 
-        // تحديث الرقم الجديد
-        const nextInvoiceNumber = await getNextInvoiceNumber();
-        document.getElementById("inv_id").value = nextInvoiceNumber;
+        // await fetchInvoices();
+        // const nextInvoiceNumber = await getNextInvoiceNumber();
+        // document.getElementById("inv_id").textContent = nextInvoiceNumber;
 
     } catch (error) {
         console.error("Error saving invoice:", error.message, error);
@@ -640,7 +628,6 @@ async function saveInvoice() {
         hideLoadingSpinner();
     }
 }
-
 
 async function saveInvoiceDetails(invoiceId) {
     const tableRows = document.getElementById("invoice-details-table").querySelector("tbody").rows;
@@ -664,15 +651,15 @@ async function saveInvoiceDetails(invoiceId) {
         }
 
         const detail = {
-            inv_dtl_id: row.rowIndex + 1, // معرف فريد لكل صف
+            inv_dtl_id: row.rowIndex + 1,
             item_qty: qty.toFixed(0), 
             item_price: price.toFixed(2), 
             inv_tax: "15.00",
             tax_amt: (qty * price * 0.15).toFixed(0),
-            inv_status: true, // حالة الفاتورة
-            cr_date: new Date().toISOString(), // تاريخ الإنشاء
-            inv: invoiceId, // رقم الفاتورة
-            item: selectedItem.id, // معرف الصنف
+            inv_status: true, 
+            cr_date: new Date().toISOString(), 
+            inv: invoiceId, 
+            item: selectedItem.id, 
         };
 
         console.log("Detail prepared for API:", detail);
@@ -714,10 +701,9 @@ async function saveInvoiceDetails(invoiceId) {
 async function deleteInvoice() {
     const invoiceId = document.getElementById("id").value;
 
-    // نافذة التأكيد
     const confirmation = confirm("هل أنت متأكد أنك تريد حذف هذه الفاتورة؟ لن تتمكن من استعادتها لاحقًا.");
     if (!confirmation) {
-        return; // إيقاف العملية إذا اختار المستخدم "إلغاء"
+        return;
     }
 
     try {
@@ -810,20 +796,18 @@ function loadInvoice(index) {
     const invoice = invoices[index];
     console.log(`تحميل الفاتورة ذات الفهرس ${index}:`, invoice);
 
-    // تعبئة الحقول بناءً على بيانات الفاتورة
     document.getElementById("id").value = invoice.id || "";
-    document.getElementById("inv_id").value = invoice.inv_id || "";
+    document.getElementById("inv_id").textContent = invoice.inv_id || "";
     document.getElementById("inv_date").value = invoice.inv_date
         ? new Date(invoice.inv_date).toISOString().slice(0, 16)
-        : new Date().toISOString().slice(0, 16); // إذا لم يكن هناك تاريخ، استخدم التاريخ الحالي
-    document.getElementById("inv_type").value = invoice.inv_type || "";
+        : new Date().toISOString().slice(0, 16); 
+    document.getElementById("inv_type").textContent = invoice.inv_type || "";
     document.getElementById("inv_amt").value = invoice.inv_amt || "0.00";
     document.getElementById("inv_notes").value = invoice.inv_notes || "";
     document.getElementById("commit").checked = invoice.commit || false;
     document.getElementById("cust").value = invoice.cust || "";
     document.getElementById("acc").value = invoice.acc || "";
 
-    // جلب وعرض تفاصيل الفاتورة
     fetchInvoiceDetails(invoice.id);
 }
 
@@ -834,15 +818,14 @@ async function fetchInvoiceDetails(invoiceId) {
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         const details = await response.json();
 
-        // تصفية التفاصيل بناءً على رقم الفاتورة
         const invoiceDetails = details.filter(detail => detail.inv == invoiceId);
         if (invoiceDetails.length === 0) {
             console.warn(`لا توجد تفاصيل للفاتورة رقم ${invoiceId}.`);
-            clearInvoiceDetails(); // مسح التفاصيل إذا لم تكن هناك بيانات
+            clearInvoiceDetails();
             return;
         }
 
-        displayInvoiceDetails(invoiceDetails); // عرض التفاصيل
+        displayInvoiceDetails(invoiceDetails);
     } catch (error) {
         console.error("Error fetching invoice details:", error);
     }
@@ -850,7 +833,7 @@ async function fetchInvoiceDetails(invoiceId) {
 
 function displayInvoiceDetails(details) {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    tableBody.innerHTML = ""; // مسح الصفوف القديمة
+    tableBody.innerHTML = ""; 
 
     details.forEach((detail, index) => {
         const row = document.createElement("tr");
@@ -882,10 +865,9 @@ function displayInvoiceDetails(details) {
 
 function clearInvoiceDetails() {
     const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
-    tableBody.innerHTML = ""; // مسح كل الصفوف
+    tableBody.innerHTML = ""; 
 }
 
-// جلب اسم الصنف
 function getItemName(itemId) {
     const item = items.find(i => i.id == itemId);
     if (!item) {
@@ -915,14 +897,15 @@ function enableTableNavigation() {
                     targetIndex = index + table.rows[0].cells.length;
                     break;
                 case "ArrowLeft": // التنقل إلى اليسار
-                    targetIndex = index - 1;
+                    targetIndex = index + 1;
                     break;
                 case "ArrowRight": // التنقل إلى اليمين
-                case "Enter": // التعامل مع Enter كالسهم اليمين
+                    targetIndex = index - 1;
+                case "Enter": 
                     targetIndex = index + 1;
                     break;
                 default:
-                    return; // إيقاف التنفيذ إذا كان المفتاح ليس من الأسهم أو Enter
+                    return; 
             }
 
             // منع التنقل خارج نطاق الجدول
@@ -943,7 +926,6 @@ function enableCellHighlight() {
         });
     });
 }
-
 
 function disableNumberScroll() {
     const numberInputs = document.querySelectorAll('input[type="number"]');
@@ -971,7 +953,6 @@ function getInvoiceTypeText(type) {
     }
 }
 
-
 // تحميل البيانات عند تحميل الصفحة
 document.addEventListener("DOMContentLoaded", async () => {
     // تحميل البيانات الأساسية
@@ -981,7 +962,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // تهيئة الفاتورة
     await initializeInvoice();
-    document.getElementById("invoice-number").textContent = document.getElementById("inv_id").value || "--";
+    document.getElementById("inv_id").textContent = document.getElementById("inv_id").textContent || "--";
     document.getElementById("invoice-date").textContent = document.getElementById("inv_date").value || "--";
 
     // تفعيل الوظائف المساعدة
@@ -1014,17 +995,54 @@ document.addEventListener("DOMContentLoaded", async () => {
         // حدث التغيير (change)
         document.getElementById("cust").addEventListener("change", async (event) => {
             const selectedCustomerId = event.target.getAttribute("data-id");
-
+        
             if (selectedCustomerId) {
-                await setAccountForCustomer(selectedCustomerId);
+                await setCustomerDetails(selectedCustomerId);
             } else {
-                console.warn("لم يتم اختيار عميل صحيح.");
+                document.getElementById("customer-info").textContent = "";
                 document.getElementById("acc").innerHTML = '<option value="">يرجى اختيار عميل صحيح</option>';
             }
-        });
+        });        
 
     } else {
         console.error("العناصر المطلوبة (cust, custlist, acc) غير موجودة في الصفحة.");
     }
 });
+function generateQRCode(invoiceData) {
+    const sellerName = "شركة ثمار الصفاء المتميزة التجارية"; // اسم البائع
+    const vatNumber = "311452959900003"; // رقم الضريبة
+    const invoiceDate = new Date(invoiceData.inv_date).toISOString(); // تنسيق ISO8601
+    const totalAmount = invoiceData.inv_amt; // المبلغ شامل الضريبة
+    const vatAmount = invoiceData.inv_tax; // الضريبة المضافة
 
+    // بناء بيانات TLV
+    const tlvData = [
+        encodeTLV(1, sellerName),
+        encodeTLV(2, vatNumber),
+        encodeTLV(3, invoiceDate),
+        encodeTLV(4, totalAmount),
+        encodeTLV(5, vatAmount)
+    ].join('');
+
+    // تحويل البيانات إلى Base64
+    const base64Data = btoa(tlvData);
+
+    // توليد QR Code
+    QRCode.toCanvas(document.getElementById('qr-code'), base64Data, { width: 128 }, function (error) {
+        if (error) {
+            console.error("QR Code generation failed:", error);
+        } else {
+            console.log("QR Code generated successfully!");
+        }
+    });
+}
+
+function encodeTLV(tag, value) {
+    const valueBytes = new TextEncoder().encode(value);
+    const lengthBytes = [valueBytes.length];
+    const tagBytes = [tag];
+    return new Uint8Array([...tagBytes, ...lengthBytes, ...valueBytes]).reduce(
+        (str, byte) => str + String.fromCharCode(byte),
+        ''
+    );
+}
