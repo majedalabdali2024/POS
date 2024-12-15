@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>قائمة الفواتير</title>
+  <link rel="stylesheet" href="Style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'jannalt', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      margin: 20px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .filters input, .filters select {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    table tr:hover {
+      background-color: #e9ecef;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>قائمة الفواتير</h1>
+    <div class="filters">
+      <div>
+        <label for="startDate">من تاريخ:</label>
+        <input type="date" id="startDate" onchange="filterInvoices()">
+      </div>
+      <div>
+        <label for="endDate">إلى تاريخ:</label>
+        <input type="date" id="endDate" onchange="filterInvoices()">
+      </div>
+      <div>
+        <label for="typeFilter">تصفية حسب النوع:</label>
+        <select id="typeFilter" onchange="filterInvoices()">
+          <option value="">الكل</option>
+          <option value="1">فاتورة شراء</option>
+          <option value="2">فاتورة بيع</option>
+          <option value="3">فاتورة مردود شراء</option>
+          <option value="4">فاتورة مردود بيع</option>
+        </select>
+      </div>
+    </div>    
+    <div class="table-container">
+      <table id="invoiceTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>رقم الفاتورة</th>
+            <th>التاريخ</th>
+            <th>اسم العميل</th>
+            <th>المبلغ</th>
+            <th>الضريبة</th>
+            <th>الصافي</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceBody">
+          <!-- سيتم تحميل البيانات هنا -->
+        </tbody>
+      </table>      
+    </div>
+  </div>
+
+  <script>
+    let invoices = []; // تخزين بيانات الفواتير
+    let customers = [];  
+
+    // وظيفة لجلب البيانات من قاعدة البيانات (مؤقتة)
+    async function fetchInvoices() {
+    try {
+        // جلب بيانات الفواتير
+        const invoicesResponse = await fetch('http://84.46.240.24:8000/api/invoices_list');
+        invoices = await invoicesResponse.json();
+
+        // جلب بيانات العملاء
+        const customersResponse = await fetch('http://84.46.240.24:8000/api/customers_list');
+        customers = await customersResponse.json();
+
+        // دمج اسم العميل مع الفواتير
+        invoices = invoices.map(invoice => {
+            const customer = customers.find(cust => cust.cust_id === invoice.cust_id);
+            return {
+                ...invoice,
+                cust_name: customer ? customer.cust_name : "غير معروف"
+            };
+        });
+
+        // عرض البيانات بعد الدمج
+        displayInvoices(invoices);
+    } catch (error) {
+        console.error("Error fetching invoices or customers:", error);
+    }
+    }
+
+    function displayInvoices(data) {
+  const tableBody = document.getElementById("invoiceBody");
+  tableBody.innerHTML = ""; // تنظيف الجدول قبل عرض البيانات الجديدة
+
+  data.forEach((invoice, index) => {
+    const row = `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${invoice.inv_id}</td>
+        <td>${new Date(invoice.inv_date).toLocaleDateString()}</td>
+        <td>${invoice.cust_name || "غير معروف"}</td>
+        <td>${parseFloat(invoice.inv_amt).toFixed(2)}</td>
+        <td>${parseFloat(invoice.inv_tax).toFixed(2)}</td>
+        <td>${parseFloat(invoice.inv_net).toFixed(2)}</td>
+        <td>
+          <button onclick="viewInvoice(${invoice.inv_id})" class="btn btn-primary">عرض</button>
+        </td>
+      </tr>
+    `;
+    tableBody.innerHTML += row; // إضافة الصف إلى الجدول
+  });
+}
+
+function filterInvoices() {
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+  const typeFilter = document.getElementById("typeFilter").value;
+
+  let filteredData = invoices;
+
+  // تصفية حسب التاريخ "من - إلى"
+  if (startDate) {
+    filteredData = filteredData.filter(invoice => 
+      new Date(invoice.inv_date) >= new Date(startDate)
+    );
+  }
+
+  if (endDate) {
+    filteredData = filteredData.filter(invoice => 
+      new Date(invoice.inv_date) <= new Date(endDate)
+    );
+  }
+
+  // تصفية حسب النوع
+  if (typeFilter) {
+    filteredData = filteredData.filter(invoice => 
+      invoice.inv_type == typeFilter
+    );
+  }
+
+  // عرض البيانات المفلترة
+  displayInvoices(filteredData);
+}
+
+    // وظيفة لإرجاع نص نوع الفاتورة
+    function getInvoiceTypeText(type) {
+      switch (type) {
+        case "1": return "فاتورة شراء";
+        case "2": return "فاتورة بيع";
+        case "3": return "فاتورة مردود شراء";
+        case "4": return "فاتورة مردود بيع";
+        default: return "غير معروف";
+      }
+    }
+
+    // وظيفة لعرض فاتورة عند الضغط على زر العرض
+    function viewInvoice(id) {
+      alert(`عرض تفاصيل الفاتورة برقم: ${id}`);
+      // يمكنك توجيه المستخدم إلى صفحة تفاصيل الفاتورة هنا
+    }
+
+    // تحميل البيانات عند فتح الصفحة
+    document.addEventListener("DOMContentLoaded", fetchInvoices);
+  </script>
+</body>
+</html>

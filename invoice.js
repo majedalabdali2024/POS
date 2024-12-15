@@ -49,6 +49,11 @@ function displayMessage(message, type) {
     }, 5000);
 }
 
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
 
 // ***********************************************
 
@@ -257,75 +262,76 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
 async function initializeInvoice() {
     resetInvoiceForm();
 
+    const invType = getQueryParam('inv_type') || "2";
+    document.getElementById("inv_type").textContent = getInvoiceTypeText(invType);
+    document.getElementById("inv_type").setAttribute("data-inv-type", invType);
+
+    const nextInvoiceNumber = await getNextInvoiceNumber(invType);
+    document.getElementById("inv_id").textContent = nextInvoiceNumber;
+
     const currentDate = new Date().toISOString().slice(0, 16);
     document.getElementById("inv_date").value = currentDate;
 
-    try {
-        const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-        const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
-        const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
-
-        document.getElementById("id").value = maxId + 1;
-        document.getElementById("inv_id").textContent = maxInvoiceId + 1; 
-    } catch (error) {
-        console.error("Error setting invoice number:", error);
-        document.getElementById("id").value = 1;
-        document.getElementById("inv_id").textContent = 1; 
-    }
-
     clearInvoiceDetails();
     ensureLastRowExists();
-    updateStatusIndicator(1); 
+    updateStatusIndicator(1);
 }
 
-async function getNextInvoiceNumber() {
+async function getNextInvoiceNumber(invType) {
     try {
+        // جلب قائمة الفواتير
         const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-        if (!invoices || invoices.length === 0) {
-            return 1; // إذا لم توجد فواتير، يبدأ الرقم من 1
-        }
 
-        const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
-        return maxInvoiceId + 1; // زيادة الرقم بأحد
+        // تصفية الفواتير بناءً على النوع
+        const filteredInvoices = invoices.filter(inv => inv.inv_type == invType);
+
+        // حساب أعلى رقم فاتورة وزيادته
+        const maxInvoiceId = filteredInvoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
+
+        return maxInvoiceId + 1;
     } catch (error) {
         console.error("Error fetching next invoice number:", error);
-        return 1; // افتراض رقم 1 في حالة وجود خطأ
+        return 1; // في حال حدوث خطأ يتم الترقيم من 1
     }
 }
 
 async function addNewInvoice() {
     try {
-        resetInvoiceForm();
+        resetInvoiceForm(); // تنظيف الشاشة مع الحفاظ على inv_type
 
-        const currentDate = new Date().toISOString().slice(0, 16);
-        document.getElementById("inv_date").value = currentDate;
+        const currentInvoiceType = document.getElementById("inv_type").getAttribute("data-inv-type");
+        const nextInvoiceNumber = await getNextInvoiceNumber(currentInvoiceType);
 
-        const nextInvoiceNumber = await getNextInvoiceNumber();
+        // إعداد البيانات الجديدة
         document.getElementById("inv_id").textContent = nextInvoiceNumber;
+        document.getElementById("inv_type").textContent = getInvoiceTypeText(currentInvoiceType);
 
-        updateStatusIndicator(1);
-        displayMessage(`تم إنشاء فاتورة جديدة برقم ${nextInvoiceNumber}.`, "success");
+        displayMessage(`تم تهيئة فاتورة جديدة (${getInvoiceTypeText(currentInvoiceType)}) برقم ${nextInvoiceNumber}.`, "success");
 
         ensureLastRowExists();
+        updateStatusIndicator(1);
     } catch (error) {
         console.error("Error adding new invoice:", error);
-        displayMessage("حدث خطأ أثناء إنشاء فاتورة جديدة.", "error");
+        displayMessage("حدث خطأ أثناء تجهيز الفاتورة الجديدة.", "error");
     }
 }
 
 function resetInvoiceForm() {
-    document.getElementById("id").value = ""; 
-    document.getElementById("inv_id").textContent = ""; 
+    const currentInvoiceType = document.getElementById("inv_type").getAttribute("data-inv-type");
+
+    document.getElementById("id").value = "";
+    document.getElementById("inv_id").textContent = "";
     document.getElementById("inv_date").value = new Date().toISOString().slice(0, 16);
-    document.getElementById("inv_type").textContent = getInvoiceTypeText("2"); 
-    document.getElementById("inv_amt").value = "0.00"; 
+    document.getElementById("inv_type").textContent = getInvoiceTypeText(currentInvoiceType);
+    document.getElementById("inv_type").setAttribute("data-inv-type", currentInvoiceType);
+    document.getElementById("inv_amt").value = "0.00";
     document.getElementById("inv_notes").value = "";
     document.getElementById("cust").value = "";
-    document.getElementById("acc").value = ""; 
+    document.getElementById("acc").value = "";
 
     clearInvoiceDetails();
+    updateTotals();
 }
-
 
 
 function ensureLastRowExists() {
@@ -436,6 +442,7 @@ function enableRowAutoAdd() {
         if (isRowFilled(rows[rows.length - 1])) {
             addDetailRow();
         }
+        updateItemCount();
         updateTotals();
     });
 }
@@ -578,18 +585,18 @@ async function saveInvoice() {
 
         const invoiceData = {
             inv_id: document.getElementById("inv_id").textContent,
+            inv_type: document.getElementById("inv_type").getAttribute("data-inv-type"),
             inv_date: new Date(document.getElementById("inv_date").value).toISOString(),
-            inv_type: 2,
-            inv_amt: (parseFloat(document.getElementById("total-after-tax").textContent)).toFixed(2), // شامل الضريبة
+            inv_amt: parseFloat(document.getElementById("total-after-tax").textContent).toFixed(2),
             inv_tax: parseFloat(document.getElementById("total-tax").textContent).toFixed(2),
-            inv_net: parseFloat(document.getElementById("total-amount").textContent).toFixed(2), // المبلغ قبل الضريبة
+            inv_net: parseFloat(document.getElementById("total-amount").textContent).toFixed(2),
             inv_notes: document.getElementById("inv_notes").value || null,
             inv_status: true,
             commit: false,
             cr_date: new Date().toISOString(),
             cust: parseInt(customerId),
             acc: parseInt(document.getElementById("acc").value) || null
-        };
+        };        
 
         console.log("Saving Invoice:", invoiceData);
 
@@ -938,6 +945,16 @@ function disableNumberScroll() {
     });
 }
 
+function updateItemCount() {
+    const tableBody = document.getElementById("invoice-details-table").querySelector("tbody");
+    const rows = Array.from(tableBody.rows).filter(row => {
+        const itemInput = row.querySelector(".item-select");
+        return itemInput && itemInput.value.trim() !== "";
+    });
+
+    document.getElementById("total-items").textContent = rows.length; // تحديث الحقل بعدد الأصناف
+}
+
 function getInvoiceTypeText(type) {
     switch (type) {
         case "1":
@@ -972,6 +989,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     ensureLastRowExists();
     enableCellHighlight();
     enableRowAutoAdd();
+    updateItemCount(); 
     // عناصر الإدخال
     const custInput = document.getElementById("cust");
     const custList = document.getElementById("custlist");

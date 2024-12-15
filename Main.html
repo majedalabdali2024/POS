@@ -108,7 +108,9 @@
     cursor: pointer;
     }
 
-
+    .sidenav a {
+    margin-bottom: 10px; /* إضافة تباعد أسفل كل رابط */
+    } 
 
     .sidenav a, .dropdown-btn {
       background-color: #343a40;
@@ -138,6 +140,11 @@
       overflow: hidden;
       height: 0;
       transition: height 0.4s ease;
+    }
+
+    .dropdown-container a {
+    display: block; /* التأكد من أن الروابط تظهر كعناصر منفصلة */
+    padding: 10px 16px; /* تعديل الحشوة داخل الروابط */
     }
 
     .dropdown-container.active {
@@ -245,8 +252,30 @@
       transform: translateX(20px);
     }
 
+    ::-webkit-scrollbar {
+        width: 10px;
+        background-color: #2d3436; 
+        transition: background-color 0.3s ease;
+    }
 
-  </style>
+    ::-webkit-scrollbar-thumb {
+        background-color: #7f8c8d;
+        border-radius: 5px;
+        border: 2px solid #2d3436;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #bdc3c7;
+        border-color: #34495e;
+        transition: background-color 0.3s ease, border-color 0.3s ease; 
+    }
+
+    ::-webkit-scrollbar-track {
+        background-color: #2d3436;
+        transition: background-color 0.3s ease; 
+    }
+</style>
 </head>
 <body class="light">
   <div id="overlay" class="overlay" onclick="toggleNav()"></div>
@@ -285,13 +314,24 @@
       <a href="#" onclick="loadPage('units.html')"><i class="fas fa-box icon"></i> الوحدات</a>
       <a href="#" onclick="loadPage('categories.html')"><i class="fas fa-layer-group icon"></i> المجموعات</a>
       <a href="#" onclick="loadPage('customers.html')"><i class="fas fa-users icon"></i> العملاء</a>
+      <a href="#" onclick="loadPage('suppliers.html')"><i class="fas fa-users icon"></i> الموردين</a>
+      
     </div>
     <button class="dropdown-btn"><i class="fas fa-folder-open"></i> النماذج
       <i class="fa fa-caret-down"></i>
     </button>
     <div class="dropdown-container">
-      <a href="#" onclick="loadPage('invoice.html')"><i class="fas fa-store icon"></i> فاتورة بيع</a>
+      <a href="#" onclick="loadPage('invoice.html?inv_type=1')"><i class="fas fa-store icon"></i> فاتورة شراء</a>
+      <a href="#" onclick="loadPage('invoice.html?inv_type=2')"><i class="fas fa-store icon"></i> فاتورة بيع</a>
+      <a href="#" onclick="loadPage('invoice.html?inv_type=3')"><i class="fas fa-store icon"></i> فاتورة مردود شراء</a>
+      <a href="#" onclick="loadPage('invoice.html?inv_type=4')"><i class="fas fa-store icon"></i> فاتورة مردود بيع</a>
       <a href="#" onclick="loadPage('pos.html')"><i class="fas fa-store icon"></i> نقاط البيع</a>
+    </div>
+    <button class="dropdown-btn"><i class="fas fa-report-open"></i> التقارير
+      <i class="fa fa-caret-down"></i>
+    </button>
+    <div class="dropdown-container">
+      <a href="#" onclick="loadPage('invoices_list.html')"><i class="fas fa-file-invoice"></i> قائمة الفواتير</a>
     </div>
     <a href="#" onclick="loadPage('settings.html')"><i class="fas fa-sliders-h icon"></i> الإعدادات</a>
   </div>
@@ -318,17 +358,16 @@
 
     var dropdown = document.getElementsByClassName("dropdown-btn");
     for (let i = 0; i < dropdown.length; i++) {
-      dropdown[i].addEventListener("click", function() {
-        this.classList.toggle("active");
-        let dropdownContent = this.nextElementSibling;
-        if (dropdownContent.style.height && dropdownContent.style.height !== "0px") {
-          dropdownContent.style.height = "0px";
-        } else {
-          dropdownContent.style.height = dropdownContent.scrollHeight + "px";
-        }
-      });
+        dropdown[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            let dropdownContent = this.nextElementSibling;
+            if (dropdownContent.style.height && dropdownContent.style.height !== "0px") {
+                dropdownContent.style.height = "0px";
+            } else {
+                dropdownContent.style.height = dropdownContent.scrollHeight + "px";
+            }
+        });
     }
-
 
     document.addEventListener("DOMContentLoaded", function () {
       const sidenav = document.getElementById('mySidenav');
@@ -351,9 +390,15 @@
           units: "الوحدات",
           categories: "المجموعات",
           customers: "العملاء",
+          suppliers:"الموردين",
           forms: "النماذج",
+          buyInvoice: "فاتورة شراء",
           saleInvoice: "فاتورة بيع",
+          rbuyInvoice: "فاتورة مردود شراء",
+          rsaleInvoice: "فاتورة مردود بيع",
           pos: "نقاط البيع",
+          reports:"التقارير",
+          invoicelist:"قائمة الفواتير",
           settings: "الإعدادات"
         },
         en: {
@@ -367,9 +412,15 @@
           units: "Units",
           categories: "Categories",
           customers: "Customers",
+          suppliers:"Suppliers",
           forms: "Forms",
+          buyInvoice: "Buy Invoice",
           saleInvoice: "Sale Invoice",
+          rbuyInvoice: "Return Buy Invoice",
+          rsaleInvoice: "Return Sale Invoice",
           pos: "POS",
+          reports:"Reports",
+          invoicelist:"Invoice List",
           settings: "Settings"
         }
       };
@@ -403,10 +454,16 @@
               if (index === 5) link.innerHTML = `<i class="fas fa-box icon"></i> ${translations[lang].units}`;
               if (index === 6) link.innerHTML = `<i class="fas fa-layer-group icon"></i> ${translations[lang].categories}`;
               if (index === 7) link.innerHTML = `<i class="fas fa-users icon"></i> ${translations[lang].customers}`;
-              if (index === 8) link.innerHTML = `<i class="fa fa-caret-down"></i><i class="fas fa-folder-open"></i> ${translations[lang].forms}`;
-              if (index === 9) link.innerHTML = `<i class="fas fa-store icon"></i> ${translations[lang].saleInvoice}`;
-              if (index === 10) link.innerHTML = `<i class="fas fa-store icon"></i> ${translations[lang].pos}`;
-              if (index === 11) link.innerHTML = `<i class="fas fa-sliders-h icon"></i> ${translations[lang].settings}`;
+              if (index === 8) link.innerHTML = `<i class="fas fa-users icon"></i> ${translations[lang].suppliers}`;
+              if (index === 9) link.innerHTML = `<i class="fa fa-caret-down"></i><i class="fas fa-folder-open"></i> ${translations[lang].forms}`;
+              if (index === 10) link.innerHTML = `<i class="fas fa-file icon"></i> ${translations[lang].buyInvoice}`;
+              if (index === 11) link.innerHTML = `<i class="fas fa-file icon"></i> ${translations[lang].saleInvoice}`;
+              if (index === 12) link.innerHTML = `<i class="fas fa-file icon"></i> ${translations[lang].rbuyInvoice}`;
+              if (index === 13) link.innerHTML = `<i class="fas fa-file icon"></i> ${translations[lang].rsaleInvoice}`;
+              if (index === 14) link.innerHTML = `<i class="fas fa-store icon"></i> ${translations[lang].pos}`;
+              if (index === 15) link.innerHTML = `<i class="fa fa-caret-down"></i><i class="fas fa-file-invoice"></i> ${translations[lang].reports}`;
+              if (index === 16) link.innerHTML = `<i class="fas fa-file-invoice"></i> ${translations[lang].invoicelist}`;
+              if (index === 17) link.innerHTML = `<i class="fas fa-sliders-h icon"></i> ${translations[lang].settings}`;
           });
 
           // تحديث موضع الـ sidenav
