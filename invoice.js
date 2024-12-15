@@ -498,7 +498,6 @@ function calculateTotals(rows) {
     return { totalBeforeTax, totalTax, totalAfterTax };
 }
 
-
 function updateTotals() {
     const rows = Array.from(document.querySelectorAll("#invoice-details-table tbody tr"));
     const { totalBeforeTax, totalTax, totalAfterTax } = calculateTotals(rows);
@@ -592,11 +591,15 @@ async function saveInvoice() {
             inv_net: parseFloat(document.getElementById("total-amount").textContent).toFixed(2),
             inv_notes: document.getElementById("inv_notes").value || null,
             inv_status: true,
-            commit: false,
+            commit: true, // التأكيد على حفظ commit = true
             cr_date: new Date().toISOString(),
             cust: parseInt(customerId),
             acc: parseInt(document.getElementById("acc").value) || null
-        };        
+        };
+
+        // توليد QR Code وحفظه كنص
+        const qrCodeText = generateQRCode(invoiceData);
+        invoiceData.inv_qr = qrCodeText; // تخزين النص في inv_qr
 
         console.log("Saving Invoice:", invoiceData);
 
@@ -619,13 +622,6 @@ async function saveInvoice() {
 
         const detailsSaved = await saveInvoiceDetails(savedInvoice.id);
         if (!detailsSaved) throw new Error("Failed to save invoice details.");
-
-        // توليد QR Code بعد الحفظ
-        generateQRCode(invoiceData);
-
-        // await fetchInvoices();
-        // const nextInvoiceNumber = await getNextInvoiceNumber();
-        // document.getElementById("inv_id").textContent = nextInvoiceNumber;
 
     } catch (error) {
         console.error("Error saving invoice:", error.message, error);
@@ -1045,7 +1041,7 @@ function generateQRCode(invoiceData) {
     // تحويل البيانات إلى Base64
     const base64Data = btoa(tlvData);
 
-    // توليد QR Code
+    // توليد QR Code إلى عنصر canvas
     QRCode.toCanvas(document.getElementById('qr-code'), base64Data, { width: 128 }, function (error) {
         if (error) {
             console.error("QR Code generation failed:", error);
@@ -1053,7 +1049,11 @@ function generateQRCode(invoiceData) {
             console.log("QR Code generated successfully!");
         }
     });
+
+    // إرجاع قيمة Base64 النصية لاستخدامها في inv_qr
+    return base64Data;
 }
+
 
 function encodeTLV(tag, value) {
     const valueBytes = new TextEncoder().encode(value);

@@ -133,10 +133,15 @@
             <!-- الحقول على اليمين -->
             <div class="col-md-9">
               <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-6 position-relative">
                   <label for="item-code" class="form-label">Item Code</label>
-                  <input class="form-control" id="item-code" type="text" placeholder="Item Code">
-                </div>
+                  <div class="input-group">
+                    <input class="form-control" id="item-code" type="text" placeholder="Item Code">
+                    <button class="btn btn-secondary" type="button" onclick="generateBarcode()" title="Generate Barcode">
+                      <i class="fas fa-barcode"></i>
+                    </button>
+                  </div>
+                </div>                
                 <div class="col-md-6">
                   <label for="item-sku" class="form-label">SKU</label>
                   <input class="form-control" id="item-sku" type="text" placeholder="SKU">
@@ -251,6 +256,7 @@ async function fetchItems() {
 
 async function saveData() {
   const id = document.getElementById('id')?.value || null;
+  const itemcode = document.getElementById('item-code').value
   const itemName = document.getElementById('item-name').value;
   const itemNameE = document.getElementById('item-name-e').value;
   const itemPrice = document.getElementById('item-price').value;
@@ -266,6 +272,7 @@ async function saveData() {
 
   // إعداد البيانات باستخدام FormData
   const formData = new FormData();
+  formData.append('item_code', itemcode);
   formData.append('item_name', itemName);
   formData.append('item_name_e', itemNameE);
   formData.append('item_price', itemPrice);
@@ -302,6 +309,7 @@ async function saveData() {
 // Preview item details
 function previewItem(item) {
   document.getElementById('id').value = item.id || '';
+  document.getElementById('item-code').value = item.item_code || '';
   document.getElementById('item-name').value = item.item_name || '';
   document.getElementById('item-name-e').value = item.item_name_e || '';
   document.getElementById('item-price').value = item.item_price || '';
@@ -433,6 +441,31 @@ function getColumnIndex(column) {
     default:
       return 1;
   }
+}
+
+function generateBarcode() {
+  // توليد رقم عشوائي بطول 12 رقمًا
+  let barcode = '';
+  for (let i = 0; i < 12; i++) {
+    barcode += Math.floor(Math.random() * 10);
+  }
+
+  // حساب الرقم 13 (رقم التحقق)
+  const checkDigit = calculateEAN13CheckDigit(barcode);
+  barcode += checkDigit;
+
+  // تحديث قيمة حقل Item Code
+  document.getElementById('item-code').value = barcode;
+}
+
+// دالة حساب رقم التحقق EAN-13
+function calculateEAN13CheckDigit(code) {
+  let sum = 0;
+  for (let i = 0; i < code.length; i++) {
+    sum += (i % 2 === 0 ? 1 : 3) * parseInt(code[i]);
+  }
+  const remainder = sum % 10;
+  return remainder === 0 ? 0 : 10 - remainder;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
