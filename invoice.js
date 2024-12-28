@@ -27,9 +27,11 @@ async function fetchData(url, options = {}) {
         return await response.json();
     } catch (error) {
         console.error(`Error fetching data from ${url}:`, error);
-        throw error; 
+        displayMessage("فشل الاتصال بالخادم. يرجى التحقق من الشبكة أو إعادة المحاولة.", "error");
+        return []; // إرجاع مصفوفة فارغة لتجنب أخطاء لاحقة
     }
 }
+
 // ***********************************************
 // دالة عامة لعرض الرسائل في واجهة المستخدم
 // ***********************************************
@@ -148,112 +150,112 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
 }
 
 
-        function validateAndSetCustomer() {
-            const customerInput = document.getElementById("cust");
-            const customerName = customerInput.value.trim();
-            const datalist = document.getElementById("custlist");
+function validateAndSetCustomer() {
+    const customerInput = document.getElementById("cust");
+    const customerName = customerInput.value.trim();
+    const datalist = document.getElementById("custlist");
 
-            if (!datalist) {
-                console.error("Datalist 'custlist' not found!");
-                return;
-            }
+    if (!datalist) {
+        console.error("Datalist 'custlist' not found!");
+        return;
+    }
 
-            const datalistOptions = Array.from(datalist.options);
+    const datalistOptions = Array.from(datalist.options);
 
-            const selectedCustomer = datalistOptions.find(option => option.value === customerName);
+    const selectedCustomer = datalistOptions.find(option => option.value === customerName);
 
-            if (selectedCustomer) {
+    if (selectedCustomer) {
 
-                customerInput.setAttribute("data-id", selectedCustomer.getAttribute("data-id"));
+        customerInput.setAttribute("data-id", selectedCustomer.getAttribute("data-id"));
+    } else {
+
+        alert("القيمة المدخلة غير صحيحة. يرجى اختيار قيمة من القائمة.");
+        customerInput.value = ""; 
+        customerInput.removeAttribute("data-id"); 
+    }
+}
+
+async function setInvoiceNumber() {
+    try {
+        const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+        if (!invoices || invoices.length === 0) {
+            document.getElementById("id").value = 1;
+            document.getElementById("inv_id").textContent = 1;
+            return;
+        }
+
+        invoices.sort((a, b) => a.inv_id - b.inv_id);
+
+        const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
+        const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
+
+        document.getElementById("id").value = maxId + 1; 
+        document.getElementById("inv_id").textContent = maxInvoiceId + 1;
+    } catch (error) {
+        console.error("Error setting invoice number:", error);
+        document.getElementById("id").value = 1; 
+        document.getElementById("inv_id").textContent = 1; 
+    }
+}
+        
+
+async function setCustomerDetails(customerId) {
+    try {
+        
+        const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
+        const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
+
+        
+        const customer = customers.find(cust => cust.id == customerId);
+
+        if (customer) {
+            
+            const customerInfo = `${customer.vat_no || ''}, ${customer.address || ''}, ${customer.mobile || ''}`;
+            document.getElementById("customer-info").textContent = customerInfo;
+
+            
+            const account = accounts.find(acc => acc.id == customer.acc);
+            if (account) {
+                document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
             } else {
-
-                alert("القيمة المدخلة غير صحيحة. يرجى اختيار قيمة من القائمة.");
-                customerInput.value = ""; 
-                customerInput.removeAttribute("data-id"); 
+                document.getElementById("acc").innerHTML = '<option value="">لا يوجد حساب مرتبط</option>';
             }
+        } else {
+           
+            document.getElementById("customer-info").textContent = "لم يتم العثور على معلومات العميل.";
+            document.getElementById("acc").innerHTML = '<option value="">يرجى اختيار عميل صحيح</option>';
         }
-
-        async function setInvoiceNumber() {
-            try {
-                const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-                if (!invoices || invoices.length === 0) {
-                    document.getElementById("id").value = 1;
-                    document.getElementById("inv_id").textContent = 1;
-                    return;
-                }
-
-                invoices.sort((a, b) => a.inv_id - b.inv_id);
-
-                const maxId = invoices.reduce((max, inv) => Math.max(max, inv.id || 0), 0);
-                const maxInvoiceId = invoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
+    } catch (error) {
         
-                document.getElementById("id").value = maxId + 1; 
-                document.getElementById("inv_id").textContent = maxInvoiceId + 1;
-            } catch (error) {
-                console.error("Error setting invoice number:", error);
-                document.getElementById("id").value = 1; 
-                document.getElementById("inv_id").textContent = 1; 
-            }
+        console.error("Error setting customer details:", error);
+        document.getElementById("customer-info").textContent = "حدث خطأ أثناء جلب معلومات العميل.";
+        document.getElementById("acc").innerHTML = '<option value="">حدث خطأ أثناء جلب الحساب</option>';
+    }
+}
+
+function updateStatusIndicator(currentStep) {
+    const steps = document.querySelectorAll('#status-indicator .step');
+    steps.forEach((step, index) => {
+        const circle = step.querySelector('.circle');
+        const line = step.querySelector('.line');
+        const text = step.querySelector('span');
+
+        if (index < currentStep) {
+            step.classList.add('completed');
+            step.classList.remove('active');
+            circle.classList.add('completed');
+            text.classList.add('completed');
+        } else if (index === currentStep) {
+            step.classList.add('active');
+            circle.classList.add('active');
+            text.classList.add('active');
+        } else {
+            step.classList.remove('completed', 'active');
+            circle.classList.remove('completed', 'active');
+            text.classList.remove('completed', 'active');
         }
-        
-
-        async function setCustomerDetails(customerId) {
-            try {
-                // جلب قائمة العملاء
-                const customers = await fetchData('http://84.46.240.24:8000/api/customers_list');
-                const accounts = await fetchData('http://84.46.240.24:8000/api/accounts_list');
-        
-                // العثور على العميل بناءً على المعرف
-                const customer = customers.find(cust => cust.id == customerId);
-        
-                if (customer) {
-                    // إعداد معلومات العميل (VAT، العنوان، ورقم الهاتف)
-                    const customerInfo = `${customer.vat_no || ''}, ${customer.address || ''}, ${customer.mobile || ''}`;
-                    document.getElementById("customer-info").textContent = customerInfo;
-        
-                    // إعداد الحساب المرتبط بالعميل
-                    const account = accounts.find(acc => acc.id == customer.acc);
-                    if (account) {
-                        document.getElementById("acc").innerHTML = `<option value="${account.id}" selected>${account.acc_name}</option>`;
-                    } else {
-                        document.getElementById("acc").innerHTML = '<option value="">لا يوجد حساب مرتبط</option>';
-                    }
-                } else {
-                    // إذا لم يتم العثور على العميل
-                    document.getElementById("customer-info").textContent = "لم يتم العثور على معلومات العميل.";
-                    document.getElementById("acc").innerHTML = '<option value="">يرجى اختيار عميل صحيح</option>';
-                }
-            } catch (error) {
-                // التعامل مع الأخطاء
-                console.error("Error setting customer details:", error);
-                document.getElementById("customer-info").textContent = "حدث خطأ أثناء جلب معلومات العميل.";
-                document.getElementById("acc").innerHTML = '<option value="">حدث خطأ أثناء جلب الحساب</option>';
-            }
-        }
-
-        function updateStatusIndicator(currentStep) {
-            const steps = document.querySelectorAll('#status-indicator .step');
-            steps.forEach((step, index) => {
-                const circle = step.querySelector('.circle');
-                const line = step.querySelector('.line');
-                const text = step.querySelector('span');
-        
-                if (index < currentStep) {
-                    step.classList.add('completed');
-                    step.classList.remove('active');
-                    circle.classList.add('completed');
-                    text.classList.add('completed');
-                } else if (index === currentStep) {
-                    step.classList.add('active');
-                    circle.classList.add('active');
-                    text.classList.add('active');
-                } else {
-                    step.classList.remove('completed', 'active');
-                    circle.classList.remove('completed', 'active');
-                    text.classList.remove('completed', 'active');
-                }
-            });
-        }
+    });
+}
         
 // ***********************************************
 // وظائف إنشاء الفواتير
@@ -262,7 +264,7 @@ function validateInput(inputId, datalistId, onValid, onInvalid) {
 async function initializeInvoice() {
     resetInvoiceForm();
 
-    const invType = getQueryParam('inv_type') || "2";
+    const invType = getQueryParam('inv_type') || "";
     document.getElementById("inv_type").textContent = getInvoiceTypeText(invType);
     document.getElementById("inv_type").setAttribute("data-inv-type", invType);
 
@@ -279,34 +281,33 @@ async function initializeInvoice() {
 
 async function getNextInvoiceNumber(invType) {
     try {
-        // جلب قائمة الفواتير
+        
         const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
+    
+        const nextInvoiceNumber = (Array.isArray(invoices) && invoices.length > 0)
+            ? Math.max(...invoices
+                .filter(inv => inv.inv_type == invType) 
+                .map(inv => inv.inv_id || 0)) + 1 
+            : 1;
 
-        // تصفية الفواتير بناءً على النوع
-        const filteredInvoices = invoices.filter(inv => inv.inv_type == invType);
-
-        // حساب أعلى رقم فاتورة وزيادته
-        const maxInvoiceId = filteredInvoices.reduce((max, inv) => Math.max(max, inv.inv_id || 0), 0);
-
-        return maxInvoiceId + 1;
+        return nextInvoiceNumber;
     } catch (error) {
         console.error("Error fetching next invoice number:", error);
-        return 1; // في حال حدوث خطأ يتم الترقيم من 1
+        displayMessage("تعذر جلب رقم الفاتورة التالي. سيتم استخدام رقم افتراضي.", "error");
+        return 1;
     }
 }
 
+
 async function addNewInvoice() {
     try {
-        resetInvoiceForm(); // تنظيف الشاشة مع الحفاظ على inv_type
+        resetInvoiceForm();
 
         const currentInvoiceType = document.getElementById("inv_type").getAttribute("data-inv-type");
         const nextInvoiceNumber = await getNextInvoiceNumber(currentInvoiceType);
 
-        // إعداد البيانات الجديدة
         document.getElementById("inv_id").textContent = nextInvoiceNumber;
         document.getElementById("inv_type").textContent = getInvoiceTypeText(currentInvoiceType);
-
-        displayMessage(`تم تهيئة فاتورة جديدة (${getInvoiceTypeText(currentInvoiceType)}) برقم ${nextInvoiceNumber}.`, "success");
 
         ensureLastRowExists();
         updateStatusIndicator(1);
@@ -328,6 +329,13 @@ function resetInvoiceForm() {
     document.getElementById("inv_notes").value = "";
     document.getElementById("cust").value = "";
     document.getElementById("acc").value = "";
+    document.getElementById("customer-info").textContent = "";
+
+    const qrCanvas = document.getElementById("inv_qr");
+    if (qrCanvas && qrCanvas.getContext) {
+        const context = qrCanvas.getContext("2d");
+        context.clearRect(0, 0, qrCanvas.width, qrCanvas.height); 
+    }
 
     clearInvoiceDetails();
     updateTotals();
@@ -591,15 +599,15 @@ async function saveInvoice() {
             inv_net: parseFloat(document.getElementById("total-amount").textContent).toFixed(2),
             inv_notes: document.getElementById("inv_notes").value || null,
             inv_status: true,
-            commit: true, // التأكيد على حفظ commit = true
+            commit: true, 
             cr_date: new Date().toISOString(),
             cust: parseInt(customerId),
             acc: parseInt(document.getElementById("acc").value) || null
         };
 
-        // توليد QR Code وحفظه كنص
+        
         const qrCodeText = generateQRCode(invoiceData);
-        invoiceData.inv_qr = qrCodeText; // تخزين النص في inv_qr
+        invoiceData.inv_qr = qrCodeText; 
 
         console.log("Saving Invoice:", invoiceData);
 
@@ -925,7 +933,7 @@ function enableCellHighlight() {
 
     inputs.forEach(input => {
         input.addEventListener("focus", (event) => {
-            event.target.select(); // تحديد النص بالكامل
+            event.target.select(); 
         });
     });
 }
@@ -935,7 +943,7 @@ function disableNumberScroll() {
     numberInputs.forEach(input => {
         input.addEventListener('keydown', (event) => {
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                event.preventDefault(); // منع التمرير
+                event.preventDefault(); 
             }
         });
     });
@@ -948,7 +956,7 @@ function updateItemCount() {
         return itemInput && itemInput.value.trim() !== "";
     });
 
-    document.getElementById("total-items").textContent = rows.length; // تحديث الحقل بعدد الأصناف
+    document.getElementById("total-items").textContent = rows.length; 
 }
 
 function getInvoiceTypeText(type) {
@@ -966,19 +974,19 @@ function getInvoiceTypeText(type) {
     }
 }
 
-// تحميل البيانات عند تحميل الصفحة
+
 document.addEventListener("DOMContentLoaded", async () => {
-    // تحميل البيانات الأساسية
+    
     await fetchItems();
     await populateList('http://84.46.240.24:8000/api/customers_list', 'custlist', 'datalist', 'id', 'cust_name');
     console.log("Datalist content:", document.getElementById('custlist').innerHTML);
 
-    // تهيئة الفاتورة
+    
     await initializeInvoice();
     document.getElementById("inv_id").textContent = document.getElementById("inv_id").textContent || "--";
     document.getElementById("invoice-date").textContent = document.getElementById("inv_date").value || "--";
 
-    // تفعيل الوظائف المساعدة
+    
     enableTableNavigation();
     disableNumberScroll();
     validateItemInput();
@@ -986,14 +994,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     enableCellHighlight();
     enableRowAutoAdd();
     updateItemCount(); 
-    // عناصر الإدخال
+    
     const custInput = document.getElementById("cust");
     const custList = document.getElementById("custlist");
     const accSelect = document.getElementById("acc");
 
-    // التحقق من وجود العناصر
+    
     if (custInput && custList && accSelect) {
-        // حدث الكتابة (input)
+        
         custInput.addEventListener("input", (event) => {
             const datalistOptions = Array.from(custList.options);
             const selectedOption = datalistOptions.find(option => option.value === event.target.value);
@@ -1006,7 +1014,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
 
-        // حدث التغيير (change)
         document.getElementById("cust").addEventListener("change", async (event) => {
             const selectedCustomerId = event.target.getAttribute("data-id");
         
@@ -1023,13 +1030,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 function generateQRCode(invoiceData) {
-    const sellerName = "شركة ثمار الصفاء المتميزة التجارية"; // اسم البائع
-    const vatNumber = "311452959900003"; // رقم الضريبة
+    const sellerName = "شركة ثمار الصفاء المتميزة التجارية";
+    const vatNumber = "311452959900003"; 
     const invoiceDate = new Date(invoiceData.inv_date).toISOString(); // تنسيق ISO8601
-    const totalAmount = invoiceData.inv_amt; // المبلغ شامل الضريبة
-    const vatAmount = invoiceData.inv_tax; // الضريبة المضافة
+    const totalAmount = invoiceData.inv_amt;
+    const vatAmount = invoiceData.inv_tax;
 
-    // بناء بيانات TLV
     const tlvData = [
         encodeTLV(1, sellerName),
         encodeTLV(2, vatNumber),
@@ -1038,11 +1044,9 @@ function generateQRCode(invoiceData) {
         encodeTLV(5, vatAmount)
     ].join('');
 
-    // تحويل البيانات إلى Base64
     const base64Data = btoa(tlvData);
-
-    // توليد QR Code إلى عنصر canvas
-    QRCode.toCanvas(document.getElementById('qr-code'), base64Data, { width: 128 }, function (error) {
+    
+    QRCode.toCanvas(document.getElementById('inv_qr'), base64Data, { width: 128 }, function (error) {
         if (error) {
             console.error("QR Code generation failed:", error);
         } else {
@@ -1050,7 +1054,6 @@ function generateQRCode(invoiceData) {
         }
     });
 
-    // إرجاع قيمة Base64 النصية لاستخدامها في inv_qr
     return base64Data;
 }
 
@@ -1064,3 +1067,36 @@ function encodeTLV(tag, value) {
         ''
     );
 }
+// function openInvoiceModal() {
+//     const items = [];
+//     const tableRows = document.querySelectorAll("#invoice-details-table tbody tr");
+    
+// tableRows.forEach(row => {
+//         const name = row.querySelector(".item-select")?.value || "غير متوفر";
+//         const qty = parseFloat(row.querySelector(".item-qty")?.value) || 0;
+//         const price = parseFloat(row.querySelector(".item-price")?.value) || 0;
+//         const tax = (qty * price * 0.15).toFixed(2);
+//         const total = (qty * price + parseFloat(tax)).toFixed(2);
+        
+//         if (name && qty > 0 && price > 0) {
+//             items.push({ name, qty, price, tax, total });
+//         }
+//     });
+
+//     const params = new URLSearchParams({
+//         inv_id: document.getElementById("inv_id").textContent || "غير متوفر",
+//         inv_date: document.getElementById("inv_date").value || new Date().toLocaleString(),
+//         subtotal: document.getElementById("total-amount").textContent || "0.00",
+//         vat: document.getElementById("total-tax").textContent || "0.00",
+//         total: document.getElementById("total-after-tax").textContent || "0.00",
+//         inv_qr: document.getElementById("inv_qr").dataset.qr || "",
+//         items: JSON.stringify(items)
+//     });
+
+//     const iframe = document.getElementById("invoiceFrame");
+//     iframe.src = `invoice_preview.html?${params.toString()}`;
+
+//     const invoiceModal = new bootstrap.Modal(document.getElementById('invoiceModal'));
+//     invoiceModal.show();
+// }
+

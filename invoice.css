@@ -164,6 +164,13 @@ footer .row div {
     border: transparent;
 }
 
+.btn-warning {
+    background-color: #fff;
+    /* color: #FFC107; */
+    color: #FD6B36;
+    border: transparent;
+}
+
 .btn-danger {
     background-color: #fff;
     color: #dc3545;
@@ -270,7 +277,7 @@ footer .row div {
 }
 
 /* QR Code */
-#qr-code {
+#inv_qr {
     margin: auto;
     width: 100px;
     height: 100px;
