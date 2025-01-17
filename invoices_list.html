@@ -121,12 +121,16 @@
 
     // دمج بيانات اسم العميل مع الفواتير
     invoices = invoicesData.map(invoice => {
-      const customer = customersData.find(cust => cust.cust_id === invoice.cust_id);
-      return {
-        ...invoice,
-        cust_name: customer ? customer.cust_name : "غير معروف" // إظهار "غير معروف" إن لم يوجد العميل
-      };
+    const customer = customersData.find(cust => cust.id === invoice.cust);
+    if (!customer) {
+      console.warn(`Customer not found for Invoice ID: ${invoice.inv_id}`);
+    }
+    return {
+      ...invoice,
+      cust_name: customer ? customer.cust_name : "غير معروف"
+    };
     });
+
 
     filteredInvoices = invoices;
     displayInvoices();

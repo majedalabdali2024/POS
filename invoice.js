@@ -281,16 +281,19 @@ async function initializeInvoice() {
 
 async function getNextInvoiceNumber(invType) {
     try {
-        
         const invoices = await fetchData('http://84.46.240.24:8000/api/invoices_list');
-    
-        const nextInvoiceNumber = (Array.isArray(invoices) && invoices.length > 0)
-            ? Math.max(...invoices
-                .filter(inv => inv.inv_type == invType) 
-                .map(inv => inv.inv_id || 0)) + 1 
-            : 1;
+        
+        // تصفية الفواتير بناءً على النوع
+        const filteredInvoices = invoices.filter(inv => inv.inv_type == invType);
 
-        return nextInvoiceNumber;
+        // إذا لم توجد فواتير من النوع المطلوب، العودة إلى الرقم 1
+        if (filteredInvoices.length === 0) {
+            return 1;
+        }
+
+        // تحديد أعلى رقم فاتورة موجود
+        const maxInvoiceId = Math.max(...filteredInvoices.map(inv => inv.inv_id || 0));
+        return maxInvoiceId + 1; // الرقم التالي
     } catch (error) {
         console.error("Error fetching next invoice number:", error);
         displayMessage("تعذر جلب رقم الفاتورة التالي. سيتم استخدام رقم افتراضي.", "error");
